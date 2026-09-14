@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billar Class — Panel de Clientes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --verde-oscuro:#0a2e22;
+    --verde:#0f4c37;
+    --verde-claro:#146b4d;
+    --dorado:#d4af37;
+    --dorado-claro:#f0d878;
+    --texto:#eef3f0;
+    --texto-sec:#9fb8ad;
+    --fondo:#0b1512;
+    --panel:#101c18;
+    --panel-2:#0d1815;
+    --borde:rgba(255,255,255,0.08);
+    --verde-ok:#2ecc71;
+    --rojo-mal:#e74c3c;
+    --amarillo:#f1c40f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--fondo);
+    color:var(--texto);
+    min-height:100vh;
+    display:flex;
+  }
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:250px;
+    background:linear-gradient(180deg, var(--verde-oscuro), #071b14);
+    border-right:1px solid var(--borde);
+    display:flex;
+    flex-direction:column;
+    padding:24px 18px;
+    position:fixed;
+    top:0;left:0;bottom:0;
+    z-index:50;
+    transition:.25s;
+  }
+  .sidebar .logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 6px 26px;
+    border-bottom:1px solid var(--borde);
+    margin-bottom:22px;
+  }
+  .sidebar .logo .icono-bola{
+    width:38px;height:38px;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #1a1a1a 0%, #000 55%);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .sidebar .logo .icono-bola::after{
+    content:"8";
+    width:16px;height:16px;
+    background:#fff;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;font-weight:800;font-size:9px;color:#111;
+  }
+  .sidebar .logo h1{
+    font-family:'Poppins',sans-serif;
+    font-size:18px;font-weight:700;
+    background:linear-gradient(90deg, var(--dorado-claro), var(--dorado));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  .nav-item{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 14px;
+    border-radius:10px;
+    color:var(--texto-sec);
+    text-decoration:none;
+    font-size:14px;font-weight:500;
+    margin-bottom:4px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .nav-item i{width:18px;text-align:center;}
+  .nav-item:hover{background:rgba(255,255,255,0.05);color:var(--texto);}
+  .nav-item.activo{
+    background:rgba(212,175,55,0.12);
+    color:var(--dorado-claro);
+    border:1px solid rgba(212,175,55,0.25);
+  }
+
+  .nav-sep{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:#547065;
+    margin:18px 14px 8px;
+  }
+
+  .sidebar-footer{
+    margin-top:auto;
+    border-top:1px solid var(--borde);
+    padding-top:16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .avatar{
+    width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg, var(--dorado), #8a6d1e);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;color:#1a1400;
+    flex-shrink:0;
+  }
+  .sidebar-footer .info{flex:1;min-width:0;}
+  .sidebar-footer .info .nombre{font-size:13.5px;font-weight:600;color:var(--texto);}
+  .sidebar-footer .info .rol{font-size:11.5px;color:var(--texto-sec);}
+  .sidebar-footer .logout{color:var(--texto-sec);cursor:pointer;font-size:15px;}
+  .sidebar-footer .logout:hover{color:var(--rojo-mal);}
+
+  .btn-menu-movil{
+    display:none;
+    position:fixed;top:16px;left:16px;z-index:60;
+    background:var(--panel);border:1px solid var(--borde);
+    color:var(--texto);width:42px;height:42px;border-radius:10px;
+    align-items:center;justify-content:center;font-size:16px;cursor:pointer;
+  }
+
+  /* ---------- CONTENIDO ---------- */
+  .contenido{
+    margin-left:250px;
+    flex:1;
+    padding:28px 34px 60px;
+    min-width:0;
+  }
+
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+    margin-bottom:28px;
+  }
+  .topbar h2{
+    font-family:'Poppins',sans-serif;
+    font-size:24px;font-weight:700;
+  }
+  .topbar p{color:var(--texto-sec);font-size:13.5px;margin-top:3px;}
+
+  .buscador{
+    display:flex;align-items:center;gap:10px;
+    background:var(--panel);
+    border:1px solid var(--borde);
+    border-radius:10px;
+    padding:10px 14px;
+    min-width:230px;
+  }
+  .buscador i{color:var(--texto-sec);}
+  .buscador input{
+    background:transparent;border:none;outline:none;
+    color:var(--texto);font-family:'Inter',sans-serif;font-size:13.5px;width:100%;
+  }
+
+  .btn-dorado{
+    background:linear-gradient(90deg, var(--dorado), #b8901f);
+    color:#1a1400;border:none;border-radius:10px;
+    padding:11px 18px;font-family:'Poppins',sans-serif;font-weight:600;font-size:13.5px;
+    display:flex;align-items:center;gap:8px;cursor:pointer;
+    box-shadow:0 6px 16px rgba(212,175,55,0.22);
+    transition:.15s;
+    white-space:nowrap;
+  }
+  .btn-dorado:hover{transform:translateY(-1px);}
+
+  /* ---------- STATS ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    margin-bottom:28px;
+  }
+  .stat-card{
+    background:var(--panel);
+    border:1px solid var(--borde);
+    border-radius:14px;
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .stat-card .icono{
+    width:42px;height:42px;border-radius:11px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;margin-bottom:14px;
+  }
+  .stat-card .valor{
+    font-family:'Poppins',sans-serif;
+    font-size:26px;font-weight:700;
+    margin-bottom:2px;
+  }
+  .stat-card .etiqueta{color:var(--texto-sec);font-size:12.5px;}
+
+  .ic-total{background:rgba(212,175,55,0.15);color:var(--dorado);}
+  .ic-activas{background:rgba(46,204,113,0.15);color:var(--verde-ok);}
+  .ic-vencidas{background:rgba(231,76,60,0.15);color:var(--rojo-mal);}
+  .ic-ingresos{background:rgba(20,107,77,0.3);color:#4dd6a5;}
+
+  /* ---------- TABLA ---------- */
+  .panel-tabla{
+    background:var(--panel);
+    border:1px solid var(--borde);
+    border-radius:16px;
+    overflow:hidden;
+  }
+  .panel-tabla .encabezado{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:20px 22px;
+    border-bottom:1px solid var(--borde);
+    flex-wrap:wrap;gap:10px;
+  }
+  .panel-tabla .encabezado h3{font-family:'Poppins',sans-serif;font-size:16px;font-weight:600;}
+  .filtros{display:flex;gap:8px;}
+  .chip{
+    padding:6px 13px;border-radius:20px;font-size:12px;font-weight:500;
+    border:1px solid var(--borde);color:var(--texto-sec);cursor:pointer;
+  }
+  .chip.activo{background:rgba(212,175,55,0.15);border-color:rgba(212,175,55,0.4);color:var(--dorado-claro);}
+
+  table{width:100%;border-collapse:collapse;min-width:820px;}
+  thead th{
+    text-align:left;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    color:var(--texto-sec);
+    padding:14px 22px;
+    border-bottom:1px solid var(--borde);
+    font-weight:600;
+  }
+  tbody td{
+    padding:16px 22px;
+    border-bottom:1px solid var(--borde);
+    font-size:13.5px;
+    vertical-align:middle;
+  }
+  tbody tr:hover{background:rgba(255,255,255,0.02);}
+  tbody tr:last-child td{border-bottom:none;}
+
+  .tienda-cell{display:flex;align-items:center;gap:11px;}
+  .tienda-icono{
+    width:38px;height:38px;border-radius:10px;
+    background:linear-gradient(135deg, var(--verde-claro), var(--verde-oscuro));
+    display:flex;align-items:center;justify-content:center;
+    color:var(--dorado-claro);font-size:14px;flex-shrink:0;
+  }
+  .tienda-nombre{font-weight:600;color:var(--texto);}
+  .tienda-sub{font-size:12px;color:var(--texto-sec);}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 12px;border-radius:20px;
+    font-size:12px;font-weight:600;
+  }
+  .badge .punto{width:6px;height:6px;border-radius:50%;}
+  .badge.ok{background:rgba(46,204,113,0.14);color:var(--verde-ok);}
+  .badge.ok .punto{background:var(--verde-ok);}
+  .badge.vencido{background:rgba(231,76,60,0.14);color:#ff8a80;}
+  .badge.vencido .punto{background:var(--rojo-mal);}
+  .badge.pronto{background:rgba(241,196,15,0.14);color:var(--amarillo);}
+  .badge.pronto .punto{background:var(--amarillo);}
+
+  .switch{
+    position:relative;width:44px;height:24px;flex-shrink:0;
+  }
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{
+    position:absolute;cursor:pointer;inset:0;
+    background:rgba(255,255,255,0.15);
+    border-radius:24px;transition:.2s;
+  }
+  .slider::before{
+    content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;
+    background:#fff;border-radius:50%;transition:.2s;
+  }
+  .switch input:checked + .slider{background:var(--verde-ok);}
+  .switch input:checked + .slider::before{transform:translateX(20px);}
+
+  .acciones{display:flex;align-items:center;gap:14px;}
+  .icon-btn{
+    color:var(--texto-sec);cursor:pointer;font-size:14px;transition:.15s;
+  }
+  .icon-btn:hover{color:var(--dorado);}
+  .icon-btn.borrar:hover{color:var(--rojo-mal);}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    display:none;
+    position:fixed;inset:0;background:rgba(0,0,0,0.6);
+    align-items:center;justify-content:center;z-index:100;
+    padding:20px;
+    backdrop-filter:blur(3px);
+  }
+  .modal-overlay.mostrar{display:flex;}
+  .modal{
+    background:var(--panel-2);
+    border:1px solid var(--borde);
+    border-radius:18px;
+    width:100%;max-width:460px;
+    padding:26px 26px 24px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .modal-head h3{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;}
+  .modal-head i{cursor:pointer;color:var(--texto-sec);font-size:16px;}
+  .modal-head i:hover{color:var(--texto);}
+
+  .form-grupo{margin-bottom:14px;}
+  .form-grupo label{display:block;font-size:12.5px;color:var(--texto-sec);margin-bottom:6px;font-weight:500;}
+  .form-grupo input, .form-grupo select{
+    width:100%;padding:11px 13px;border-radius:9px;
+    background:rgba(0,0,0,0.25);border:1px solid var(--borde);
+    color:var(--texto);font-family:'Inter',sans-serif;font-size:13.5px;outline:none;
+  }
+  .form-grupo input:focus, .form-grupo select:focus{border-color:var(--dorado);}
+  .form-fila{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  .modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+  .btn-secundario{
+    background:transparent;border:1px solid var(--borde);color:var(--texto-sec);
+    padding:11px 18px;border-radius:10px;font-family:'Inter',sans-serif;font-weight:500;font-size:13.5px;cursor:pointer;
+  }
+  .btn-secundario:hover{color:var(--texto);border-color:var(--texto-sec);}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:960px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+  }
+
+  @media (max-width:768px){
+    .sidebar{transform:translateX(-100%);}
+    .sidebar.abierto{transform:translateX(0);}
+    .contenido{margin-left:0;padding:80px 18px 50px;}
+    .btn-menu-movil{display:flex;}
+    .form-fila{grid-template-columns:1fr;}
+  }
+
+  @media (max-width:480px){
+    .stats{grid-template-columns:1fr;}
+    .topbar h2{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="btn-menu-movil" id="btnMenu"><i class="fa-solid fa-bars"></i></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="icono-bola"></div>
+    <h1>Billar Class</h1>
+  </div>
+
+  <div class="nav-sep">Principal</div>
+  <a class="nav-item activo"><i class="fa-solid fa-table-columns"></i> Clientes</a>
+  <a class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Pagos</a>
+  <a class="nav-item"><i class="fa-solid fa-chart-line"></i> Estadísticas</a>
+
+  <div class="nav-sep">Sistema</div>
+  <a class="nav-item"><i class="fa-solid fa-qrcode"></i> Código de Pago</a>
+  <a class="nav-item"><i class="fa-solid fa-gear"></i> Configuración</a>
+
+  <div class="sidebar-footer">
+    <div class="avatar">P</div>
+    <div class="info">
+      <div class="nombre">pelones</div>
+      <div class="rol">Administrador</div>
+    </div>
+    <i class="fa-solid fa-arrow-right-from-bracket logout" id="btnLogout" title="Cerrar sesión"></i>
+  </div>
+</aside>
+
+<!-- CONTENIDO -->
+<main class="contenido">
+  <div class="topbar">
+    <div>
+      <h2>Panel de Clientes</h2>
+      <p>Gestiona las suscripciones de todas tus tiendas</p>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div class="buscador">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Buscar tienda...">
+      </div>
+      <button class="btn-dorado" id="btnNuevoCliente">
+        <i class="fa-solid fa-plus"></i> Agregar Cliente
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="icono ic-total"><i class="fa-solid fa-shop"></i></div>
+      <div class="valor">12</div>
+      <div class="etiqueta">Tiendas Registradas</div>
+    </div>
+    <div class="stat-card">
+      <div class="icono ic-activas"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="valor">9</div>
+      <div class="etiqueta">Suscripciones Activas</div>
+    </div>
+    <div class="stat-card">
+      <div class="icono ic-vencidas"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="valor">3</div>
+      <div class="etiqueta">Suscripciones Vencidas</div>
+    </div>
+    <div class="stat-card">
+      <div class="icono ic-ingresos"><i class="fa-solid fa-sack-dollar"></i></div>
+      <div class="valor">$900.000</div>
+      <div class="etiqueta">Ingresos del Mes (COP)</div>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="panel-tabla">
+    <div class="encabezado">
+      <h3>Todas las tiendas</h3>
+      <div class="filtros">
+        <div class="chip activo">Todas</div>
+        <div class="chip">Activas</div>
+        <div class="chip">Vencidas</div>
+        <div class="chip">Por vencer</div>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Tienda</th>
+          <th>Contacto</th>
+          <th>Plan</th>
+          <th>Vence</th>
+          <th>Estado</th>
+          <th>Acceso</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaClientes">
+        <tr>
+          <td>
+            <div class="tienda-cell">
+              <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
+              <div>
+                <div class="tienda-nombre">Billar El Duende</div>
+                <div class="tienda-sub">Bogotá, Colombia</div>
+              </div>
+            </div>
+          </td>
+          <td>+57 300 123 4567</td>
+          <td>Mensual</td>
+          <td>15 Oct 2026</td>
+          <td><span class="badge ok"><span class="punto"></span> Activo</span></td>
+          <td><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+          <td>
+            <div class="acciones">
+              <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
+              <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
+              <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="tienda-cell">
+              <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
+              <div>
+                <div class="tienda-nombre">Salón de Billar Central</div>
+                <div class="tienda-sub">Chía, Colombia</div>
+              </div>
+            </div>
+          </td>
+          <td>+57 312 555 8899</td>
+          <td>Mensual</td>
+          <td>02 Sept 2026</td>
+          <td><span class="badge vencido"><span class="punto"></span> Vencido</span></td>
+          <td><label class="switch"><input type="checkbox"><span class="slider"></span></label></td>
+          <td>
+            <div class="acciones">
+              <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
+              <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
+              <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="tienda-cell">
+              <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
+              <div>
+                <div class="tienda-nombre">Pool House Norte</div>
+                <div class="tienda-sub">Zipaquirá, Colombia</div>
+              </div>
+            </div>
+          </td>
+          <td>+57 320 777 2211</td>
+          <td>Trimestral</td>
+          <td>20 Sept 2026</td>
+          <td><span class="badge pronto"><span class="punto"></span> Por vencer</span></td>
+          <td><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+          <td>
+            <div class="acciones">
+              <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
+              <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
+              <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="tienda-cell">
+              <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
+              <div>
+                <div class="tienda-nombre">Bola 8 Bar & Billar</div>
+                <div class="tienda-sub">Cajicá, Colombia</div>
+              </div>
+            </div>
+          </td>
+          <td>+57 301 444 9090</td>
+          <td>Mensual</td>
+          <td>28 Oct 2026</td>
+          <td><span class="badge ok"><span class="punto"></span> Activo</span></td>
+          <td><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+          <td>
+            <div class="acciones">
+              <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
+              <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
+              <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL AGREGAR CLIENTE -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Agregar Nuevo Cliente</h3>
+      <i class="fa-solid fa-xmark" id="cerrarModal"></i>
+    </div>
+
+    <div class="form-grupo">
+      <label>Nombre de la tienda</label>
+      <input type="text" placeholder="Ej: Billar El Duende">
+    </div>
+
+    <div class="form-fila">
+      <div class="form-grupo">
+        <label>Ciudad</label>
+        <input type="text" placeholder="Ej: Bogotá">
+      </div>
+      <div class="form-grupo">
+        <label>Teléfono / WhatsApp</label>
+        <input type="text" placeholder="+57 300 000 0000">
+      </div>
+    </div>
+
+    <div class="form-fila">
+      <div class="form-grupo">
+        <label>Plan</label>
+        <select>
+          <option>Mensual — $100.000</option>
+          <option>Trimestral — $270.000</option>
+          <option>Anual — $1.000.000</option>
+        </select>
+      </div>
+      <div class="form-grupo">
+        <label>Fecha de inicio</label>
+        <input type="date">
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secundario" id="cancelarModal">Cancelar</button>
+      <button class="btn-dorado"><i class="fa-solid fa-check"></i> Guardar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Menú móvil
+  const sidebar = document.getElementById('sidebar');
+  document.getElementById('btnMenu').addEventListener('click', () => {
+    sidebar.classList.toggle('abierto');
+  });
+
+  // Modal agregar cliente
+  const modal = document.getElementById('modalOverlay');
+  document.getElementById('btnNuevoCliente').addEventListener('click', () => modal.classList.add('mostrar'));
+  document.getElementById('cerrarModal').addEventListener('click', () => modal.classList.remove('mostrar'));
+  document.getElementById('cancelarModal').addEventListener('click', () => modal.classList.remove('mostrar'));
+  modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('mostrar'); });
+
+  // Logout (demo)
+  document.getElementById('btnLogout').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  // Filtros (solo visual por ahora)
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('activo'));
+      chip.classList.add('activo');
+    });
+  });
+</script>
+
+</body>
+</html>

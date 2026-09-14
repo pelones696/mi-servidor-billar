@@ -1,31 +1,329 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>Mi Servidor Railway</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    h1 { color: #333; }
-    .status { background: #e8f5e9; padding: 15px; border-radius: 5px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billar Class — Iniciar Sesión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --verde-oscuro:#0a2e22;
+    --verde:#0f4c37;
+    --verde-claro:#146b4d;
+    --dorado:#d4af37;
+    --dorado-claro:#f0d878;
+    --texto:#f2f5f3;
+    --texto-sec:#a9c2b8;
+    --card-bg:rgba(255,255,255,0.06);
+    --card-borde:rgba(212,175,55,0.25);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(212,175,55,0.08) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(20,107,77,0.25) 0%, transparent 45%),
+      linear-gradient(160deg, var(--verde-oscuro) 0%, #071b14 60%, #050f0b 100%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    position:relative;
+    overflow:hidden;
+  }
+  /* Textura sutil de mesa de billar */
+  body::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 12px);
+    pointer-events:none;
+  }
+  .bola{
+    position:absolute;
+    border-radius:50%;
+    opacity:0.12;
+    filter:blur(1px);
+  }
+  .bola.b1{width:180px;height:180px;background:radial-gradient(circle at 35% 30%, var(--dorado-claro), var(--dorado) 60%, #8a6d1e 100%);top:-40px;left:-60px;}
+  .bola.b2{width:120px;height:120px;background:radial-gradient(circle at 35% 30%, #fff, #cfcfcf 60%, #8a8a8a 100%);bottom:8%;right:6%;opacity:0.08;}
+  .bola.b3{width:90px;height:90px;background:radial-gradient(circle at 35% 30%, var(--dorado-claro), var(--dorado) 60%, #8a6d1e 100%);bottom:-20px;left:12%;opacity:0.07;}
+
+  .login-wrap{
+    position:relative;
+    z-index:2;
+    width:100%;
+    max-width:420px;
+  }
+
+  .marca{
+    text-align:center;
+    margin-bottom:28px;
+  }
+  .marca .icono-bola{
+    width:64px;height:64px;
+    margin:0 auto 14px;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #1a1a1a 0%, #000 55%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 24px rgba(0,0,0,0.5), inset 0 -6px 10px rgba(255,255,255,0.05);
+    position:relative;
+  }
+  .marca .icono-bola::after{
+    content:"8";
+    width:26px;height:26px;
+    background:#fff;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;
+    font-weight:800;
+    font-size:14px;
+    color:#111;
+  }
+  .marca h1{
+    font-family:'Poppins',sans-serif;
+    font-weight:800;
+    font-size:32px;
+    letter-spacing:0.5px;
+    background:linear-gradient(90deg, var(--dorado-claro), var(--dorado) 60%, #b8901f);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .marca p{
+    color:var(--texto-sec);
+    font-size:13px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+
+  .card{
+    background:var(--card-bg);
+    border:1px solid var(--card-borde);
+    border-radius:20px;
+    padding:38px 32px 30px;
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    box-shadow:0 20px 60px rgba(0,0,0,0.45);
+  }
+
+  .card h2{
+    font-family:'Poppins',sans-serif;
+    font-size:20px;
+    font-weight:600;
+    color:var(--texto);
+    margin-bottom:4px;
+  }
+  .card .sub{
+    color:var(--texto-sec);
+    font-size:13.5px;
+    margin-bottom:26px;
+  }
+
+  .campo{
+    margin-bottom:18px;
+  }
+  .campo label{
+    display:block;
+    font-size:12.5px;
+    color:var(--texto-sec);
+    margin-bottom:7px;
+    font-weight:500;
+    letter-spacing:0.3px;
+  }
+  .input-box{
+    display:flex;
+    align-items:center;
+    background:rgba(0,0,0,0.25);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:11px;
+    padding:0 14px;
+    transition:.2s;
+  }
+  .input-box:focus-within{
+    border-color:var(--dorado);
+    box-shadow:0 0 0 3px rgba(212,175,55,0.15);
+  }
+  .input-box i{
+    color:var(--texto-sec);
+    font-size:14px;
+    width:20px;
+  }
+  .input-box input{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:var(--texto);
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    padding:13px 10px;
+  }
+  .input-box input::placeholder{color:#6f8a7f;}
+  .toggle-pass{
+    cursor:pointer;
+    color:var(--texto-sec);
+  }
+  .toggle-pass:hover{color:var(--dorado);}
+
+  .fila-opciones{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:6px 0 24px;
+    font-size:12.5px;
+  }
+  .fila-opciones label{
+    color:var(--texto-sec);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+  }
+  .fila-opciones a{
+    color:var(--dorado);
+    text-decoration:none;
+  }
+  .fila-opciones a:hover{text-decoration:underline;}
+
+  .btn-login{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:11px;
+    background:linear-gradient(90deg, var(--dorado), #b8901f);
+    color:#1a1400;
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:0.3px;
+    cursor:pointer;
+    transition:.2s;
+    box-shadow:0 8px 20px rgba(212,175,55,0.25);
+  }
+  .btn-login:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 26px rgba(212,175,55,0.35);
+  }
+  .btn-login:active{transform:translateY(0);}
+
+  .error-msg{
+    display:none;
+    background:rgba(220,53,69,0.12);
+    border:1px solid rgba(220,53,69,0.4);
+    color:#ff9aa5;
+    font-size:13px;
+    padding:10px 14px;
+    border-radius:9px;
+    margin-bottom:18px;
+    align-items:center;
+    gap:8px;
+  }
+  .error-msg.mostrar{display:flex;}
+
+  .pie{
+    text-align:center;
+    margin-top:26px;
+    color:#6f8a7f;
+    font-size:12px;
+  }
+  .pie strong{color:var(--texto-sec);}
+
+  @media (max-width:480px){
+    .card{padding:30px 22px 24px;border-radius:16px;}
+    .marca h1{font-size:26px;}
+  }
+</style>
 </head>
 <body>
-  <h1>✅ Servidor en Railway Funcionando</h1>
-  <div class="status">
-    <p><strong>Estado:</strong> Conectado</p>
-    <p><strong>IP:</strong> Accesible desde cualquier lado</p>
-    <button onclick="traerDatos()">Ver datos del servidor</button>
-    <p id="datos"></p>
+
+  <div class="bola b1"></div>
+  <div class="bola b2"></div>
+  <div class="bola b3"></div>
+
+  <div class="login-wrap">
+    <div class="marca">
+      <div class="icono-bola"></div>
+      <h1>Billar Class</h1>
+      <p>Panel de Administración</p>
+    </div>
+
+    <div class="card">
+      <h2>Bienvenido de nuevo</h2>
+      <div class="sub">Ingresa tus credenciales para continuar</div>
+
+      <div class="error-msg" id="errorMsg">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>Usuario o contraseña incorrectos</span>
+      </div>
+
+      <form id="formLogin">
+        <div class="campo">
+          <label>Usuario</label>
+          <div class="input-box">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="usuario" placeholder="Tu usuario" autocomplete="username" required>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Contraseña</label>
+          <div class="input-box">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="clave" placeholder="••••••••" autocomplete="current-password" required>
+            <i class="fa-regular fa-eye toggle-pass" id="togglePass"></i>
+          </div>
+        </div>
+
+        <div class="fila-opciones">
+          <label><input type="checkbox" id="recordar"> Recordarme</label>
+          <a href="#">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button type="submit" class="btn-login">
+          <i class="fa-solid fa-right-to-bracket"></i>&nbsp; Iniciar Sesión
+        </button>
+      </form>
+    </div>
+
+    <div class="pie">
+      <strong>Billar Class</strong> · Sistema de administración de suscripciones
+    </div>
   </div>
 
-  <script>
-    function traerDatos() {
-      fetch('/api/datos')
-        .then(r => r.json())
-        .then(data => {
-          document.getElementById('datos').innerHTML = 
-            '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
-        });
+<script>
+  const togglePass = document.getElementById('togglePass');
+  const clave = document.getElementById('clave');
+  togglePass.addEventListener('click', () => {
+    const esPass = clave.type === 'password';
+    clave.type = esPass ? 'text' : 'password';
+    togglePass.classList.toggle('fa-eye');
+    togglePass.classList.toggle('fa-eye-slash');
+  });
+
+  const form = document.getElementById('formLogin');
+  const errorMsg = document.getElementById('errorMsg');
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const usuario = document.getElementById('usuario').value.trim();
+    const pass = clave.value.trim();
+
+    // Demo: credenciales de prueba (solo interfaz, sin backend real todavía)
+    if(usuario === 'pelones' && pass === '1234'){
+      errorMsg.classList.remove('mostrar');
+      window.location.href = 'dashboard.html';
+    } else {
+      errorMsg.classList.add('mostrar');
     }
-  </script>
+  });
+</script>
+
 </body>
 </html>
