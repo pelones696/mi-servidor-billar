@@ -275,20 +275,32 @@
   .badge.pronto .punto{background:var(--amarillo);}
 
   .switch{
-    position:relative;width:44px;height:24px;flex-shrink:0;
+    position:relative;width:50px;height:26px;flex-shrink:0;
   }
   .switch input{opacity:0;width:0;height:0;}
   .slider{
     position:absolute;cursor:pointer;inset:0;
-    background:rgba(255,255,255,0.15);
+    background:rgba(231,76,60,0.22);
+    border:1.5px solid rgba(231,76,60,0.55);
     border-radius:24px;transition:.2s;
   }
   .slider::before{
-    content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;
-    background:#fff;border-radius:50%;transition:.2s;
+    content:"\f00d";
+    font-family:"Font Awesome 6 Free";font-weight:900;font-size:9px;
+    display:flex;align-items:center;justify-content:center;
+    position:absolute;height:20px;width:20px;left:2px;bottom:2px;
+    background:#e74c3c;color:#fff;border-radius:50%;transition:.2s;
+    box-shadow:0 1px 4px rgba(0,0,0,0.4);
   }
-  .switch input:checked + .slider{background:var(--verde-ok);}
-  .switch input:checked + .slider::before{transform:translateX(20px);}
+  .switch input:checked + .slider{
+    background:rgba(46,204,113,0.22);
+    border-color:rgba(46,204,113,0.6);
+  }
+  .switch input:checked + .slider::before{
+    content:"\f00c";
+    transform:translateX(24px);
+    background:var(--verde-ok);
+  }
 
   .acciones{display:flex;align-items:center;gap:14px;}
   .icon-btn{
@@ -470,38 +482,101 @@
 
     <div class="form-grupo">
       <label>Nombre de la tienda</label>
-      <input type="text" placeholder="Ej: Billar El Duende">
+      <input type="text" id="nuevoNombre" placeholder="Ej: Billar El Duende">
     </div>
 
     <div class="form-fila">
       <div class="form-grupo">
         <label>Ciudad</label>
-        <input type="text" placeholder="Ej: Bogotá">
+        <input type="text" id="nuevoCiudad" placeholder="Ej: Bogotá">
       </div>
       <div class="form-grupo">
         <label>Teléfono / WhatsApp</label>
-        <input type="text" placeholder="+57 300 000 0000">
+        <input type="text" id="nuevoTelefono" placeholder="+57 300 000 0000">
       </div>
     </div>
 
     <div class="form-fila">
       <div class="form-grupo">
         <label>Plan</label>
-        <select>
-          <option>Mensual — $100.000</option>
-          <option>Trimestral — $270.000</option>
-          <option>Anual — $1.000.000</option>
+        <select id="nuevoPlan">
+          <option value="Mensual|100000|1">Mensual — $100.000</option>
+          <option value="Trimestral|270000|3">Trimestral — $270.000</option>
+          <option value="Anual|1000000|12">Anual — $1.000.000</option>
         </select>
       </div>
       <div class="form-grupo">
         <label>Fecha de inicio</label>
-        <input type="date">
+        <input type="date" id="nuevoFechaInicio">
       </div>
     </div>
 
+    <p id="errorNuevo" style="color:var(--rojo-mal);font-size:12.5px;margin-top:-6px;display:none;"></p>
+
     <div class="modal-footer">
       <button class="btn-secundario" id="cancelarModal">Cancelar</button>
-      <button class="btn-dorado"><i class="fa-solid fa-check"></i> Guardar Cliente</button>
+      <button class="btn-dorado" id="btnGuardarCliente"><i class="fa-solid fa-check"></i> Guardar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR CLIENTE -->
+<div class="modal-overlay" id="modalEditarOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Editar Cliente</h3>
+      <i class="fa-solid fa-xmark" id="cerrarModalEditar"></i>
+    </div>
+
+    <input type="hidden" id="editarId">
+
+    <div class="form-grupo">
+      <label>Nombre de la tienda</label>
+      <input type="text" id="editarNombre">
+    </div>
+
+    <div class="form-fila">
+      <div class="form-grupo">
+        <label>Ciudad</label>
+        <input type="text" id="editarCiudad">
+      </div>
+      <div class="form-grupo">
+        <label>Teléfono / WhatsApp</label>
+        <input type="text" id="editarTelefono">
+      </div>
+    </div>
+
+    <div class="form-fila">
+      <div class="form-grupo">
+        <label>Plan</label>
+        <select id="editarPlan">
+          <option value="Mensual">Mensual — $100.000</option>
+          <option value="Trimestral">Trimestral — $270.000</option>
+          <option value="Anual">Anual — $1.000.000</option>
+        </select>
+      </div>
+      <div class="form-grupo">
+        <label>Valor (COP)</label>
+        <input type="number" id="editarValor">
+      </div>
+    </div>
+
+    <div class="form-fila">
+      <div class="form-grupo">
+        <label>Fecha de inicio</label>
+        <input type="date" id="editarFechaInicio">
+      </div>
+      <div class="form-grupo">
+        <label>Fecha de vencimiento</label>
+        <input type="date" id="editarFechaVencimiento">
+      </div>
+    </div>
+
+    <p id="errorEditar" style="color:var(--rojo-mal);font-size:12.5px;margin-top:-6px;display:none;"></p>
+
+    <div class="modal-footer">
+      <button class="btn-secundario" id="cancelarModalEditar">Cancelar</button>
+      <button class="btn-dorado" id="btnGuardarEdicion"><i class="fa-solid fa-check"></i> Guardar Cambios</button>
     </div>
   </div>
 </div>
@@ -515,10 +590,135 @@
 
   // Modal agregar cliente
   const modal = document.getElementById('modalOverlay');
-  document.getElementById('btnNuevoCliente').addEventListener('click', () => modal.classList.add('mostrar'));
+  function abrirModalNuevo(){
+    document.getElementById('nuevoNombre').value = '';
+    document.getElementById('nuevoCiudad').value = '';
+    document.getElementById('nuevoTelefono').value = '';
+    document.getElementById('nuevoPlan').selectedIndex = 0;
+    document.getElementById('nuevoFechaInicio').value = new Date().toISOString().slice(0,10);
+    document.getElementById('errorNuevo').style.display = 'none';
+    modal.classList.add('mostrar');
+  }
+  document.getElementById('btnNuevoCliente').addEventListener('click', abrirModalNuevo);
   document.getElementById('cerrarModal').addEventListener('click', () => modal.classList.remove('mostrar'));
   document.getElementById('cancelarModal').addEventListener('click', () => modal.classList.remove('mostrar'));
   modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('mostrar'); });
+
+  // Guardar nuevo cliente (conectado a la API real)
+  function sumarMeses(fechaISO, meses){
+    const fecha = new Date(fechaISO + 'T00:00:00');
+    fecha.setMonth(fecha.getMonth() + meses);
+    return fecha.toISOString().slice(0,10);
+  }
+
+  document.getElementById('btnGuardarCliente').addEventListener('click', () => {
+    const nombre = document.getElementById('nuevoNombre').value.trim();
+    const ciudad = document.getElementById('nuevoCiudad').value.trim();
+    const telefono = document.getElementById('nuevoTelefono').value.trim();
+    const [planNombre, planValor, planMeses] = document.getElementById('nuevoPlan').value.split('|');
+    const fechaInicio = document.getElementById('nuevoFechaInicio').value;
+    const errorEl = document.getElementById('errorNuevo');
+
+    if(!nombre){
+      errorEl.textContent = 'Por favor escribe el nombre de la tienda.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    if(!fechaInicio){
+      errorEl.textContent = 'Por favor selecciona la fecha de inicio.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+
+    const fechaVencimiento = sumarMeses(fechaInicio, parseInt(planMeses, 10));
+
+    fetch('/api/clientes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre, ciudad, telefono,
+        plan: planNombre,
+        valor: parseInt(planValor, 10),
+        fecha_inicio: fechaInicio,
+        fecha_vencimiento: fechaVencimiento
+      })
+    })
+      .then(r => r.json())
+      .then(resp => {
+        if(resp.ok){
+          modal.classList.remove('mostrar');
+          cargarClientes();
+        } else {
+          errorEl.textContent = resp.mensaje || 'No se pudo agregar el cliente.';
+          errorEl.style.display = 'block';
+        }
+      })
+      .catch(() => {
+        errorEl.textContent = 'No se pudo conectar con el servidor.';
+        errorEl.style.display = 'block';
+      });
+  });
+
+  // Modal editar cliente
+  const modalEditar = document.getElementById('modalEditarOverlay');
+  document.getElementById('cerrarModalEditar').addEventListener('click', () => modalEditar.classList.remove('mostrar'));
+  document.getElementById('cancelarModalEditar').addEventListener('click', () => modalEditar.classList.remove('mostrar'));
+  modalEditar.addEventListener('click', (e) => { if(e.target === modalEditar) modalEditar.classList.remove('mostrar'); });
+
+  function abrirModalEditar(cliente){
+    document.getElementById('editarId').value = cliente.id;
+    document.getElementById('editarNombre').value = cliente.nombre || '';
+    document.getElementById('editarCiudad').value = cliente.ciudad || '';
+    document.getElementById('editarTelefono').value = cliente.telefono || '';
+    document.getElementById('editarPlan').value = cliente.plan || 'Mensual';
+    document.getElementById('editarValor').value = cliente.valor || 0;
+    document.getElementById('editarFechaInicio').value = cliente.fecha_inicio || '';
+    document.getElementById('editarFechaVencimiento').value = cliente.fecha_vencimiento || '';
+    document.getElementById('errorEditar').style.display = 'none';
+    modalEditar.classList.add('mostrar');
+  }
+
+  document.getElementById('btnGuardarEdicion').addEventListener('click', () => {
+    const id = document.getElementById('editarId').value;
+    const errorEl = document.getElementById('errorEditar');
+    const nombre = document.getElementById('editarNombre').value.trim();
+
+    if(!nombre){
+      errorEl.textContent = 'Por favor escribe el nombre de la tienda.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+
+    fetch(`/api/clientes/${id}/editar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre,
+        ciudad: document.getElementById('editarCiudad').value.trim(),
+        telefono: document.getElementById('editarTelefono').value.trim(),
+        plan: document.getElementById('editarPlan').value,
+        valor: parseInt(document.getElementById('editarValor').value, 10) || 0,
+        fecha_inicio: document.getElementById('editarFechaInicio').value,
+        fecha_vencimiento: document.getElementById('editarFechaVencimiento').value
+      })
+    })
+      .then(r => r.json())
+      .then(resp => {
+        if(resp.ok){
+          modalEditar.classList.remove('mostrar');
+          cargarClientes();
+        } else {
+          errorEl.textContent = resp.mensaje || 'No se pudo guardar los cambios.';
+          errorEl.style.display = 'block';
+        }
+      })
+      .catch(() => {
+        errorEl.textContent = 'No se pudo conectar con el servidor.';
+        errorEl.style.display = 'block';
+      });
+  });
 
   // Logout (demo)
   document.getElementById('btnLogout').addEventListener('click', () => {
@@ -581,13 +781,21 @@
             <td><label class="switch"><input type="checkbox" data-id="${c.id}" ${c.activo ? 'checked' : ''}><span class="slider"></span></label></td>
             <td>
               <div class="acciones">
-                <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
+                <i class="fa-solid fa-pen icon-btn" title="Editar" data-id="${c.id}"></i>
                 <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
                 <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
               </div>
             </td>
           `;
           tbody.appendChild(fila);
+        });
+
+        // Conectar el ícono de editar con el modal de edición
+        tbody.querySelectorAll('.fa-pen').forEach(icono => {
+          icono.addEventListener('click', () => {
+            const cliente = clientes.find(c => c.id === icono.dataset.id);
+            if(cliente) abrirModalEditar(cliente);
+          });
         });
 
         // Conectar cada switch con la API real

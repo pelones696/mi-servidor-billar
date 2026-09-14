@@ -142,13 +142,26 @@ app.post('/api/suscripcion/:id/renovar', (req, res) => {
   res.json({ ok: true, mensaje: `${cliente.nombre} renovado`, cliente });
 });
  
+// ---------- Genera el siguiente identificador con formato Local-001, Local-002... ----------
+function generarSiguienteId(clientes) {
+  let maxNumero = 0;
+  clientes.forEach(c => {
+    const coincide = /^local-(\d+)$/i.exec(c.id || '');
+    if (coincide) {
+      const numero = parseInt(coincide[1], 10);
+      if (numero > maxNumero) maxNumero = numero;
+    }
+  });
+  const siguiente = maxNumero + 1;
+  return `Local-${String(siguiente).padStart(3, '0')}`;
+}
+ 
 // ---------- Agregar un nuevo local ----------
 app.post('/api/clientes', (req, res) => {
   const clientes = leerClientes();
   const { nombre, ciudad, telefono, plan, valor, fecha_inicio, fecha_vencimiento } = req.body;
  
-  const siguienteNumero = clientes.length + 1;
-  const nuevoId = `local-${siguienteNumero}`;
+  const nuevoId = generarSiguienteId(clientes);
  
   const nuevoCliente = {
     id: nuevoId,
@@ -165,6 +178,31 @@ app.post('/api/clientes', (req, res) => {
   clientes.push(nuevoCliente);
   guardarClientes(clientes);
   res.json({ ok: true, cliente: nuevoCliente });
+});
+ 
+// ---------- Editar datos y fechas de un cliente existente ----------
+app.post('/api/clientes/:id/editar', (req, res) => {
+  const clientes = leerClientes();
+  const cliente = clientes.find(c => c.id === req.params.id);
+ 
+  if (!cliente) {
+    return res.status(404).json({ ok: false, mensaje: 'Local no encontrado' });
+  }
+ 
+  const { nombre, ciudad, telefono, plan, valor, fecha_inicio, fecha_vencimiento } = req.body;
+  if (nombre !== undefined) cliente.nombre = nombre;
+  if (ciudad !== undefined) cliente.ciudad = ciudad;
+  if (telefono !== undefined) cliente.telefono = telefono;
+  if (plan !== undefined) cliente.plan = plan;
+  if (valor !== undefined) cliente.valor = valor;
+  if (fecha_inicio !== undefined) cliente.fecha_inicio = fecha_inicio;
+  if (fecha_vencimiento !== undefined) cliente.fecha_vencimiento = fecha_vencimiento;
+ 
+  guardarClientes(clientes);
+  verificarVencimientos(); // por si la nueva fecha cambia el estado de una vez
+  io.emit('suscripcion:actualizada', { id: cliente.id, activo: cliente.activo, nombre: cliente.nombre });
+ 
+  res.json({ ok: true, mensaje: `${cliente.nombre} actualizado`, cliente });
 });
  
 // ---------- Ruta de prueba original ----------
@@ -202,4 +240,3 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Servidor Billar Class corriendo en puerto ${PORT}`);
 });
- 
