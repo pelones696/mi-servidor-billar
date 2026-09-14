@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mi Servidor Railway</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    h1 { color: #333; }
+    .status { background: #e8f5e9; padding: 15px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>✅ Servidor en Railway Funcionando</h1>
+  <div class="status">
+    <p><strong>Estado:</strong> Conectado</p>
+    <p><strong>IP:</strong> Accesible desde cualquier lado</p>
+    <button onclick="traerDatos()">Ver datos del servidor</button>
+    <p id="datos"></p>
+  </div>
+
+  <script>
+    function traerDatos() {
+      fetch('/api/datos')
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('datos').innerHTML = 
+            '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        });
+    }
+  </script>
+</body>
+</html>
