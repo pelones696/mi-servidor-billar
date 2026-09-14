@@ -1,8 +1,15 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
  
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: '*' }
+});
+ 
 app.use(express.json());
 app.use(express.static('public'));
  
@@ -19,8 +26,6 @@ function guardarClientes(clientes) {
 }
  
 // ---------- ENDPOINT PRINCIPAL: verificar si un local está activo ----------
-// Esto es lo que consultará el Programa del Mostrador (Nivel 2) de cada local.
-// Ejemplo: GET /api/suscripcion/local-1
 app.get('/api/suscripcion/:id', (req, res) => {
   const clientes = leerClientes();
   const cliente = clientes.find(c => c.id === req.params.id);
@@ -62,6 +67,10 @@ app.post('/api/suscripcion/:id/activar', (req, res) => {
  
   cliente.activo = true;
   guardarClientes(clientes);
+ 
+  // Avisa EN VIVO a todas las pantallas conectadas (mostradores) de este local
+  io.emit('suscripcion:actualizada', { id: cliente.id, activo: true, nombre: cliente.nombre });
+ 
   res.json({ ok: true, mensaje: `${cliente.nombre} activado`, cliente });
 });
  
@@ -76,6 +85,10 @@ app.post('/api/suscripcion/:id/desactivar', (req, res) => {
  
   cliente.activo = false;
   guardarClientes(clientes);
+ 
+  // Avisa EN VIVO a todas las pantallas conectadas (mostradores) de este local
+  io.emit('suscripcion:actualizada', { id: cliente.id, activo: false, nombre: cliente.nombre });
+ 
   res.json({ ok: true, mensaje: `${cliente.nombre} desactivado`, cliente });
 });
  
@@ -113,7 +126,15 @@ app.get('/api/datos', (req, res) => {
   });
 });
  
+// ---------- Conexión en vivo (Socket.io) ----------
+io.on('connection', (socket) => {
+  console.log('Una pantalla se conectó en vivo:', socket.id);
+  socket.on('disconnect', () => {
+    console.log('Una pantalla se desconectó:', socket.id);
+  });
+});
+ 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Servidor Billar Class corriendo en puerto ${PORT}`);
 });

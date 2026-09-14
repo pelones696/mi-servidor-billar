@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billar Class — Mostrador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --verde-oscuro:#0a2e22;
+    --verde:#0f4c37;
+    --verde-claro:#146b4d;
+    --dorado:#d4af37;
+    --dorado-claro:#f0d878;
+    --texto:#eef3f0;
+    --texto-sec:#9fb8ad;
+    --fondo:#0b1512;
+    --panel:#101c18;
+    --panel-2:#0d1815;
+    --borde:rgba(255,255,255,0.08);
+    --verde-ok:#2ecc71;
+    --rojo-mal:#e74c3c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--fondo);
+    color:var(--texto);
+    min-height:100vh;
+  }
+
+  /* ---------- TOPBAR ---------- */
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:16px 26px;
+    background:linear-gradient(180deg, var(--verde-oscuro), #071b14);
+    border-bottom:1px solid var(--borde);
+    flex-wrap:wrap;gap:10px;
+  }
+  .marca{display:flex;align-items:center;gap:12px;}
+  .icono-bola{
+    width:36px;height:36px;border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #1a1a1a 0%, #000 55%);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .icono-bola::after{
+    content:"8";width:15px;height:15px;background:#fff;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;font-weight:800;font-size:9px;color:#111;
+  }
+  .marca h1{
+    font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;
+    background:linear-gradient(90deg, var(--dorado-claro), var(--dorado));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .marca .sub{font-size:12px;color:var(--texto-sec);}
+
+  .estado-conexion{
+    display:flex;align-items:center;gap:8px;
+    font-size:12.5px;color:var(--texto-sec);
+    background:var(--panel);border:1px solid var(--borde);
+    padding:7px 14px;border-radius:20px;
+  }
+  .punto-estado{width:8px;height:8px;border-radius:50%;background:var(--rojo-mal);transition:.2s;}
+  .punto-estado.conectado{background:var(--verde-ok);box-shadow:0 0 6px var(--verde-ok);}
+
+  /* ---------- CONTENIDO ---------- */
+  .contenido{
+    max-width:1100px;margin:0 auto;
+    padding:26px 20px 60px;
+    display:grid;
+    grid-template-columns:1.1fr 1.4fr;
+    gap:20px;
+  }
+
+  .panel-box{
+    background:var(--panel);
+    border:1px solid var(--borde);
+    border-radius:16px;
+    padding:22px;
+  }
+  .panel-box h2{
+    font-family:'Poppins',sans-serif;font-size:15.5px;font-weight:600;
+    margin-bottom:18px;display:flex;align-items:center;gap:9px;
+  }
+  .panel-box h2 i{color:var(--dorado);}
+
+  /* ---------- TIEMPO ---------- */
+  .reloj{
+    font-family:'Poppins',sans-serif;
+    font-size:46px;font-weight:700;
+    text-align:center;
+    letter-spacing:1px;
+    margin:8px 0 6px;
+    color:var(--dorado-claro);
+  }
+  .reloj-sub{text-align:center;color:var(--texto-sec);font-size:12.5px;margin-bottom:18px;}
+
+  .fila-tarifa{
+    display:flex;align-items:center;gap:10px;
+    justify-content:center;margin-bottom:18px;
+  }
+  .fila-tarifa label{font-size:12.5px;color:var(--texto-sec);}
+  .fila-tarifa input{
+    width:110px;padding:8px 10px;border-radius:8px;
+    background:rgba(0,0,0,0.25);border:1px solid var(--borde);
+    color:var(--texto);font-size:13px;outline:none;text-align:right;
+  }
+  .fila-tarifa input:focus{border-color:var(--dorado);}
+
+  .valor-tiempo{
+    text-align:center;font-size:14px;color:var(--texto-sec);margin-bottom:20px;
+  }
+  .valor-tiempo strong{color:var(--dorado-claro);font-size:17px;}
+
+  .btns-tiempo{display:flex;gap:10px;}
+  .btn{
+    flex:1;padding:13px;border:none;border-radius:10px;
+    font-family:'Poppins',sans-serif;font-weight:600;font-size:14px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+    transition:.15s;
+  }
+  .btn-iniciar{background:linear-gradient(90deg, var(--verde-ok), #229954);color:#fff;}
+  .btn-detener{background:linear-gradient(90deg, var(--rojo-mal), #a93226);color:#fff;}
+  .btn-reiniciar{background:transparent;border:1px solid var(--borde);color:var(--texto-sec);flex:0 0 auto;width:48px;}
+  .btn:hover{transform:translateY(-1px);}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+  /* ---------- PRODUCTOS RÁPIDOS ---------- */
+  .productos-rapidos{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;
+  }
+  .producto-rapido{
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--borde);
+    border-radius:12px;
+    padding:12px;
+    cursor:pointer;
+    transition:.15s;
+    text-align:center;
+  }
+  .producto-rapido:hover{background:rgba(212,175,55,0.08);border-color:rgba(212,175,55,0.3);}
+  .producto-rapido i{font-size:20px;color:var(--dorado-claro);margin-bottom:6px;display:block;}
+  .producto-rapido .nombre{font-size:12.5px;font-weight:600;margin-bottom:4px;}
+  .producto-rapido .precio-edit{
+    display:flex;align-items:center;justify-content:center;gap:4px;
+  }
+  .producto-rapido .precio-edit span{font-size:11.5px;color:var(--texto-sec);}
+  .producto-rapido input{
+    width:70px;background:rgba(0,0,0,0.3);border:1px solid var(--borde);
+    border-radius:6px;color:var(--dorado-claro);font-size:11.5px;
+    padding:3px 5px;text-align:center;outline:none;
+  }
+  .producto-rapido input:focus{border-color:var(--dorado);}
+
+  /* ---------- FORM MANUAL ---------- */
+  .form-manual{
+    display:grid;grid-template-columns:1.6fr 0.8fr 0.6fr auto;gap:8px;margin-bottom:20px;
+  }
+  .form-manual input{
+    padding:10px 12px;border-radius:9px;
+    background:rgba(0,0,0,0.25);border:1px solid var(--borde);
+    color:var(--texto);font-size:13px;outline:none;width:100%;
+  }
+  .form-manual input:focus{border-color:var(--dorado);}
+  .form-manual button{
+    background:var(--dorado);border:none;border-radius:9px;color:#1a1400;
+    width:40px;font-size:15px;cursor:pointer;
+  }
+
+  /* ---------- TABLA CONSUMO ---------- */
+  .tabla-consumo{width:100%;border-collapse:collapse;font-size:13px;}
+  .tabla-consumo thead th{
+    text-align:left;color:var(--texto-sec);font-size:11px;text-transform:uppercase;
+    padding:8px 6px;border-bottom:1px solid var(--borde);
+  }
+  .tabla-consumo tbody td{padding:10px 6px;border-bottom:1px solid var(--borde);}
+  .tabla-consumo tbody tr:last-child td{border-bottom:none;}
+  .tabla-consumo .quitar{color:var(--texto-sec);cursor:pointer;}
+  .tabla-consumo .quitar:hover{color:var(--rojo-mal);}
+  .vacio-consumo{text-align:center;color:var(--texto-sec);padding:26px 0;font-size:13px;}
+
+  .totales{
+    margin-top:16px;padding-top:16px;border-top:1px solid var(--borde);
+  }
+  .fila-total{display:flex;justify-content:space-between;font-size:13.5px;color:var(--texto-sec);margin-bottom:8px;}
+  .fila-total.grande{font-size:19px;font-weight:700;color:var(--dorado-claro);font-family:'Poppins',sans-serif;margin-top:10px;}
+
+  /* ---------- OVERLAY DE BLOQUEO ---------- */
+  .overlay-bloqueo{
+    display:none;
+    position:fixed;inset:0;z-index:200;
+    background:rgba(4,10,8,0.94);
+    backdrop-filter:blur(6px);
+    align-items:center;justify-content:center;
+    padding:24px;
+  }
+  .overlay-bloqueo.activo{display:flex;}
+  .caja-bloqueo{
+    background:var(--panel-2);
+    border:1px solid rgba(231,76,60,0.35);
+    border-radius:20px;
+    padding:36px 32px;
+    max-width:420px;width:100%;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.6);
+  }
+  .caja-bloqueo .icono-candado{
+    width:70px;height:70px;border-radius:50%;
+    background:rgba(231,76,60,0.14);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 18px;font-size:30px;color:var(--rojo-mal);
+  }
+  .caja-bloqueo h2{
+    font-family:'Poppins',sans-serif;font-size:21px;font-weight:700;
+    color:#ff8a80;margin-bottom:8px;
+  }
+  .caja-bloqueo p{color:var(--texto-sec);font-size:13.5px;margin-bottom:22px;line-height:1.5;}
+  .caja-bloqueo .qr-box{
+    background:#fff;border-radius:14px;padding:12px;
+    display:inline-block;margin-bottom:18px;
+  }
+  .caja-bloqueo .qr-box img{display:block;width:170px;height:170px;}
+  .caja-bloqueo .ref{
+    background:rgba(255,255,255,0.04);border:1px solid var(--borde);
+    border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--texto-sec);
+    margin-bottom:6px;
+  }
+  .caja-bloqueo .ref strong{color:var(--dorado-claro);}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:800px){
+    .contenido{grid-template-columns:1fr;}
+  }
+  @media (max-width:480px){
+    .form-manual{grid-template-columns:1fr 1fr;}
+    .form-manual button{grid-column:span 2;width:100%;}
+    .reloj{font-size:36px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="marca">
+    <div class="icono-bola"></div>
+    <div>
+      <h1>Billar Class — Mostrador</h1>
+      <div class="sub" id="nombreLocal">Cargando local...</div>
+    </div>
+  </div>
+  <div class="estado-conexion">
+    <span class="punto-estado" id="puntoEstado"></span>
+    <span id="textoEstado">Conectando...</span>
+  </div>
+</div>
+
+<div class="contenido">
+
+  <!-- COLUMNA IZQUIERDA: TIEMPO -->
+  <div class="panel-box">
+    <h2><i class="fa-solid fa-stopwatch"></i> Tiempo de Mesa</h2>
+
+    <div class="reloj" id="reloj">00:00:00</div>
+    <div class="reloj-sub" id="estadoTiempo">Tiempo detenido</div>
+
+    <div class="fila-tarifa">
+      <label>Tarifa por hora</label>
+      <input type="number" id="tarifaHora" value="8000">
+    </div>
+
+    <div class="valor-tiempo">
+      Valor del tiempo: <strong id="valorTiempo">$0</strong>
+    </div>
+
+    <div class="btns-tiempo">
+      <button class="btn btn-iniciar" id="btnIniciar"><i class="fa-solid fa-play"></i> Iniciar</button>
+      <button class="btn btn-detener" id="btnDetener" disabled><i class="fa-solid fa-pause"></i> Detener</button>
+      <button class="btn btn-reiniciar" id="btnReiniciar" title="Reiniciar"><i class="fa-solid fa-rotate-left"></i></button>
+    </div>
+  </div>
+
+  <!-- COLUMNA DERECHA: PRODUCTOS Y CONSUMO -->
+  <div class="panel-box">
+    <h2><i class="fa-solid fa-cart-shopping"></i> Productos y Consumo</h2>
+
+    <div class="productos-rapidos">
+      <div class="producto-rapido" data-nombre="Coca-Cola" data-icono="fa-bottle-water">
+        <i class="fa-solid fa-bottle-water"></i>
+        <div class="nombre">Coca-Cola</div>
+        <div class="precio-edit"><span>$</span><input type="number" class="precio-rapido" value="4000"></div>
+      </div>
+      <div class="producto-rapido" data-nombre="Cigarrillos" data-icono="fa-smoking">
+        <i class="fa-solid fa-smoking"></i>
+        <div class="nombre">Cigarrillos</div>
+        <div class="precio-edit"><span>$</span><input type="number" class="precio-rapido" value="6000"></div>
+      </div>
+      <div class="producto-rapido" data-nombre="Chicles" data-icono="fa-cookie">
+        <i class="fa-solid fa-cookie"></i>
+        <div class="nombre">Chicles</div>
+        <div class="precio-edit"><span>$</span><input type="number" class="precio-rapido" value="1500"></div>
+      </div>
+      <div class="producto-rapido" data-nombre="Papas" data-icono="fa-cookie-bite">
+        <i class="fa-solid fa-cookie-bite"></i>
+        <div class="nombre">Papas</div>
+        <div class="precio-edit"><span>$</span><input type="number" class="precio-rapido" value="3500"></div>
+      </div>
+    </div>
+
+    <div class="form-manual">
+      <input type="text" id="manualNombre" placeholder="Nombre del producto">
+      <input type="number" id="manualPrecio" placeholder="Precio">
+      <input type="number" id="manualCantidad" placeholder="Cant." value="1">
+      <button id="btnAgregarManual"><i class="fa-solid fa-plus"></i></button>
+    </div>
+
+    <table class="tabla-consumo">
+      <thead>
+        <tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr>
+      </thead>
+      <tbody id="cuerpoConsumo"></tbody>
+    </table>
+    <div class="vacio-consumo" id="vacioConsumo">Aún no se han agregado productos</div>
+
+    <div class="totales">
+      <div class="fila-total"><span>Valor del tiempo</span><span id="totalTiempo">$0</span></div>
+      <div class="fila-total"><span>Consumo (productos)</span><span id="totalProductos">$0</span></div>
+      <div class="fila-total grande"><span>TOTAL A PAGAR</span><span id="totalGeneral">$0</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- OVERLAY DE BLOQUEO POR SUSCRIPCIÓN -->
+<div class="overlay-bloqueo" id="overlayBloqueo">
+  <div class="caja-bloqueo">
+    <div class="icono-candado"><i class="fa-solid fa-lock"></i></div>
+    <h2>Suscripción Vencida</h2>
+    <p>El servicio de <strong id="nombreLocalBloqueo">este local</strong> está bloqueado por falta de pago.<br>Por favor realiza el pago para reactivar tu servicio.</p>
+
+    <div class="qr-box">
+      <img id="imgQr" src="" alt="Código QR de pago">
+    </div>
+
+    <div class="ref">Referencia de pago: <strong id="refPago">—</strong></div>
+    <div class="ref">Valor: <strong>$100.000 COP</strong></div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // ============================================================
+  // ID DE ESTE LOCAL — cambiar este valor en cada instalación
+  // (local-1, local-2, local-3, ...)
+  // ============================================================
+  const LOCAL_ID = "local-1";
+  // ============================================================
+
+  const socket = io();
+  const puntoEstado = document.getElementById('puntoEstado');
+  const textoEstado = document.getElementById('textoEstado');
+  const overlay = document.getElementById('overlayBloqueo');
+  const nombreLocalEl = document.getElementById('nombreLocal');
+  const nombreLocalBloqueo = document.getElementById('nombreLocalBloqueo');
+  const refPago = document.getElementById('refPago');
+
+  function generarQr(texto){
+    const url = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(texto);
+    document.getElementById('imgQr').src = url;
+  }
+
+  function mostrarBloqueo(nombre){
+    nombreLocalBloqueo.textContent = nombre || LOCAL_ID;
+    refPago.textContent = 'PAGO-' + LOCAL_ID.toUpperCase() + '-' + new Date().getFullYear();
+    generarQr('Pago Billar Class - ' + LOCAL_ID + ' - $100.000 COP');
+    overlay.classList.add('activo');
+  }
+
+  function ocultarBloqueo(){
+    overlay.classList.remove('activo');
+  }
+
+  // ---------- Estado inicial: consulta al servidor ----------
+  fetch('/api/suscripcion/' + LOCAL_ID)
+    .then(r => r.json())
+    .then(data => {
+      if(!data.encontrado){
+        nombreLocalEl.textContent = 'Local no registrado (' + LOCAL_ID + ')';
+        mostrarBloqueo(LOCAL_ID);
+        return;
+      }
+      nombreLocalEl.textContent = data.nombre + ' (' + LOCAL_ID + ')';
+      if(!data.activo){
+        mostrarBloqueo(data.nombre);
+      }
+    })
+    .catch(() => {
+      textoEstado.textContent = 'Sin conexión al servidor';
+    });
+
+  // ---------- Conexión en vivo ----------
+  socket.on('connect', () => {
+    puntoEstado.classList.add('conectado');
+    textoEstado.textContent = 'Conectado en vivo';
+  });
+
+  socket.on('disconnect', () => {
+    puntoEstado.classList.remove('conectado');
+    textoEstado.textContent = 'Reconectando...';
+  });
+
+  // ---------- Escuchar cambios de suscripción EN VIVO ----------
+  socket.on('suscripcion:actualizada', (data) => {
+    if(data.id !== LOCAL_ID) return; // solo nos interesa nuestro propio local
+
+    if(data.activo){
+      ocultarBloqueo();
+    } else {
+      mostrarBloqueo(data.nombre);
+    }
+  });
+
+  // ============================================================
+  // TIEMPO DE MESA (cronómetro)
+  // ============================================================
+  let segundos = 0;
+  let corriendo = false;
+  let intervalo = null;
+
+  const relojEl = document.getElementById('reloj');
+  const estadoTiempoEl = document.getElementById('estadoTiempo');
+  const btnIniciar = document.getElementById('btnIniciar');
+  const btnDetener = document.getElementById('btnDetener');
+  const btnReiniciar = document.getElementById('btnReiniciar');
+  const tarifaHoraInput = document.getElementById('tarifaHora');
+  const valorTiempoEl = document.getElementById('valorTiempo');
+
+  function formatearTiempo(totalSegundos){
+    const h = String(Math.floor(totalSegundos/3600)).padStart(2,'0');
+    const m = String(Math.floor((totalSegundos%3600)/60)).padStart(2,'0');
+    const s = String(totalSegundos%60).padStart(2,'0');
+    return `${h}:${m}:${s}`;
+  }
+
+  function actualizarValorTiempo(){
+    const tarifa = parseFloat(tarifaHoraInput.value) || 0;
+    const valor = Math.round((segundos/3600) * tarifa);
+    valorTiempoEl.textContent = '$' + valor.toLocaleString('es-CO');
+    document.getElementById('totalTiempo').textContent = '$' + valor.toLocaleString('es-CO');
+    actualizarTotalGeneral(valor);
+  }
+
+  function tick(){
+    segundos++;
+    relojEl.textContent = formatearTiempo(segundos);
+    actualizarValorTiempo();
+  }
+
+  btnIniciar.addEventListener('click', () => {
+    if(corriendo) return;
+    corriendo = true;
+    intervalo = setInterval(tick, 1000);
+    btnIniciar.disabled = true;
+    btnDetener.disabled = false;
+    estadoTiempoEl.textContent = 'Tiempo corriendo...';
+  });
+
+  btnDetener.addEventListener('click', () => {
+    corriendo = false;
+    clearInterval(intervalo);
+    btnIniciar.disabled = false;
+    btnDetener.disabled = true;
+    estadoTiempoEl.textContent = 'Tiempo detenido';
+  });
+
+  btnReiniciar.addEventListener('click', () => {
+    corriendo = false;
+    clearInterval(intervalo);
+    segundos = 0;
+    relojEl.textContent = '00:00:00';
+    btnIniciar.disabled = false;
+    btnDetener.disabled = true;
+    estadoTiempoEl.textContent = 'Tiempo detenido';
+    actualizarValorTiempo();
+  });
+
+  tarifaHoraInput.addEventListener('input', actualizarValorTiempo);
+
+  // ============================================================
+  // PRODUCTOS Y CONSUMO
+  // ============================================================
+  let consumo = []; // { nombre, precio, cantidad }
+
+  const cuerpoConsumo = document.getElementById('cuerpoConsumo');
+  const vacioConsumo = document.getElementById('vacioConsumo');
+  const totalProductosEl = document.getElementById('totalProductos');
+  const totalGeneralEl = document.getElementById('totalGeneral');
+
+  function agregarProducto(nombre, precio, cantidad){
+    if(!nombre || precio <= 0 || cantidad <= 0) return;
+    consumo.push({ nombre, precio, cantidad });
+    renderizarConsumo();
+  }
+
+  function quitarProducto(indice){
+    consumo.splice(indice, 1);
+    renderizarConsumo();
+  }
+
+  function renderizarConsumo(){
+    cuerpoConsumo.innerHTML = '';
+    if(consumo.length === 0){
+      vacioConsumo.style.display = 'block';
+    } else {
+      vacioConsumo.style.display = 'none';
+    }
+
+    let totalProductos = 0;
+
+    consumo.forEach((item, i) => {
+      const subtotal = item.precio * item.cantidad;
+      totalProductos += subtotal;
+
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${item.nombre}</td>
+        <td>${item.cantidad}</td>
+        <td>$${item.precio.toLocaleString('es-CO')}</td>
+        <td>$${subtotal.toLocaleString('es-CO')}</td>
+        <td><i class="fa-solid fa-xmark quitar" data-i="${i}"></i></td>
+      `;
+      cuerpoConsumo.appendChild(fila);
+    });
+
+    document.querySelectorAll('.quitar').forEach(el => {
+      el.addEventListener('click', () => quitarProducto(parseInt(el.dataset.i)));
+    });
+
+    totalProductosEl.textContent = '$' + totalProductos.toLocaleString('es-CO');
+    actualizarTotalGeneral(null, totalProductos);
+  }
+
+  let ultimoValorTiempo = 0;
+  let ultimoValorProductos = 0;
+
+  function actualizarTotalGeneral(valorTiempo, valorProductos){
+    if(valorTiempo !== null && valorTiempo !== undefined) ultimoValorTiempo = valorTiempo;
+    if(valorProductos !== null && valorProductos !== undefined) ultimoValorProductos = valorProductos;
+    const total = ultimoValorTiempo + ultimoValorProductos;
+    totalGeneralEl.textContent = '$' + total.toLocaleString('es-CO');
+  }
+
+  // Botones de productos rápidos
+  document.querySelectorAll('.producto-rapido').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if(e.target.tagName === 'INPUT') return; // no agregar si está editando el precio
+      const nombre = card.dataset.nombre;
+      const precio = parseFloat(card.querySelector('.precio-rapido').value) || 0;
+      agregarProducto(nombre, precio, 1);
+    });
+  });
+
+  // Evitar que el click en el input de precio dispare el "agregar"
+  document.querySelectorAll('.precio-rapido').forEach(input => {
+    input.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  // Formulario manual
+  document.getElementById('btnAgregarManual').addEventListener('click', () => {
+    const nombre = document.getElementById('manualNombre').value.trim();
+    const precio = parseFloat(document.getElementById('manualPrecio').value) || 0;
+    const cantidad = parseInt(document.getElementById('manualCantidad').value) || 1;
+
+    agregarProducto(nombre, precio, cantidad);
+
+    document.getElementById('manualNombre').value = '';
+    document.getElementById('manualPrecio').value = '';
+    document.getElementById('manualCantidad').value = '1';
+  });
+
+  renderizarConsumo();
+  actualizarValorTiempo();
+</script>
+
+</body>
+</html>

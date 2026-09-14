@@ -453,98 +453,7 @@
         </tr>
       </thead>
       <tbody id="tablaClientes">
-        <tr>
-          <td>
-            <div class="tienda-cell">
-              <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
-              <div>
-                <div class="tienda-nombre">Billar El Duende</div>
-                <div class="tienda-sub">Bogotá, Colombia</div>
-              </div>
-            </div>
-          </td>
-          <td>+57 300 123 4567</td>
-          <td>Mensual</td>
-          <td>15 Oct 2026</td>
-          <td><span class="badge ok"><span class="punto"></span> Activo</span></td>
-          <td><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></td>
-          <td>
-            <div class="acciones">
-              <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
-              <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
-              <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div class="tienda-cell">
-              <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
-              <div>
-                <div class="tienda-nombre">Salón de Billar Central</div>
-                <div class="tienda-sub">Chía, Colombia</div>
-              </div>
-            </div>
-          </td>
-          <td>+57 312 555 8899</td>
-          <td>Mensual</td>
-          <td>02 Sept 2026</td>
-          <td><span class="badge vencido"><span class="punto"></span> Vencido</span></td>
-          <td><label class="switch"><input type="checkbox"><span class="slider"></span></label></td>
-          <td>
-            <div class="acciones">
-              <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
-              <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
-              <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div class="tienda-cell">
-              <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
-              <div>
-                <div class="tienda-nombre">Pool House Norte</div>
-                <div class="tienda-sub">Zipaquirá, Colombia</div>
-              </div>
-            </div>
-          </td>
-          <td>+57 320 777 2211</td>
-          <td>Trimestral</td>
-          <td>20 Sept 2026</td>
-          <td><span class="badge pronto"><span class="punto"></span> Por vencer</span></td>
-          <td><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></td>
-          <td>
-            <div class="acciones">
-              <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
-              <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
-              <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div class="tienda-cell">
-              <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
-              <div>
-                <div class="tienda-nombre">Bola 8 Bar & Billar</div>
-                <div class="tienda-sub">Cajicá, Colombia</div>
-              </div>
-            </div>
-          </td>
-          <td>+57 301 444 9090</td>
-          <td>Mensual</td>
-          <td>28 Oct 2026</td>
-          <td><span class="badge ok"><span class="punto"></span> Activo</span></td>
-          <td><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></td>
-          <td>
-            <div class="acciones">
-              <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
-              <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
-              <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
-            </div>
-          </td>
-        </tr>
+        <tr><td colspan="7" style="text-align:center;color:var(--texto-sec);padding:26px;">Cargando clientes...</td></tr>
       </tbody>
     </table>
     </div>
@@ -623,6 +532,91 @@
       chip.classList.add('activo');
     });
   });
+
+  // ============================================================
+  // CARGAR CLIENTES REALES DESDE EL SERVIDOR Y CONECTAR SWITCHES
+  // ============================================================
+  const tbody = document.getElementById('tablaClientes');
+
+  function formatearFecha(fechaISO){
+    if(!fechaISO) return '—';
+    const [anio, mes, dia] = fechaISO.split('-');
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sept','Oct','Nov','Dic'];
+    return `${dia} ${meses[parseInt(mes)-1]} ${anio}`;
+  }
+
+  function badgeEstado(activo){
+    return activo
+      ? '<span class="badge ok"><span class="punto"></span> Activo</span>'
+      : '<span class="badge vencido"><span class="punto"></span> Vencido</span>';
+  }
+
+  function cargarClientes(){
+    fetch('/api/clientes')
+      .then(r => r.json())
+      .then(clientes => {
+        tbody.innerHTML = '';
+
+        if(clientes.length === 0){
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--texto-sec);padding:26px;">No hay clientes registrados aún</td></tr>';
+          return;
+        }
+
+        clientes.forEach(c => {
+          const fila = document.createElement('tr');
+          fila.innerHTML = `
+            <td>
+              <div class="tienda-cell">
+                <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
+                <div>
+                  <div class="tienda-nombre">${c.nombre}</div>
+                  <div class="tienda-sub">${c.ciudad || '—'} · ${c.id}</div>
+                </div>
+              </div>
+            </td>
+            <td>${c.telefono || '—'}</td>
+            <td>${c.plan}</td>
+            <td>${formatearFecha(c.fecha_vencimiento)}</td>
+            <td class="celda-estado">${badgeEstado(c.activo)}</td>
+            <td><label class="switch"><input type="checkbox" data-id="${c.id}" ${c.activo ? 'checked' : ''}><span class="slider"></span></label></td>
+            <td>
+              <div class="acciones">
+                <i class="fa-solid fa-pen icon-btn" title="Editar"></i>
+                <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
+                <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(fila);
+        });
+
+        // Conectar cada switch con la API real
+        tbody.querySelectorAll('.switch input').forEach(input => {
+          input.addEventListener('change', () => {
+            const id = input.dataset.id;
+            const accion = input.checked ? 'activar' : 'desactivar';
+
+            fetch(`/api/suscripcion/${id}/${accion}`, { method: 'POST' })
+              .then(r => r.json())
+              .then(resp => {
+                if(resp.ok){
+                  const fila = input.closest('tr');
+                  fila.querySelector('.celda-estado').innerHTML = badgeEstado(input.checked);
+                }
+              })
+              .catch(() => {
+                alert('No se pudo conectar con el servidor. Intenta de nuevo.');
+                input.checked = !input.checked; // revertir si falló
+              });
+          });
+        });
+      })
+      .catch(() => {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--texto-sec);padding:26px;">No se pudo conectar con el servidor</td></tr>';
+      });
+  }
+
+  cargarClientes();
 </script>
 
 </body>
