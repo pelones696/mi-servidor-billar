@@ -1,0 +1,46 @@
+[
+  {
+    "id": "local-1",
+    "nombre": "Billar El Duende",
+    "ciudad": "Bogotá",
+    "telefono": "+57 300 123 4567",
+    "plan": "Mensual",
+    "valor": 100000,
+    "fecha_inicio": "2026-08-15",
+    "fecha_vencimiento": "2026-10-15",
+    "activo": true
+  },
+  {
+    "id": "local-2",
+    "nombre": "Salón de Billar Central",
+    "ciudad": "Chía",
+    "telefono": "+57 312 555 8899",
+    "plan": "Mensual",
+    "valor": 100000,
+    "fecha_inicio": "2026-08-02",
+    "fecha_vencimiento": "2026-09-02",
+    "activo": false
+  },
+  {
+    "id": "local-3",
+    "nombre": "Pool House Norte",
+    "ciudad": "Zipaquirá",
+    "telefono": "+57 320 777 2211",
+    "plan": "Trimestral",
+    "valor": 270000,
+    "fecha_inicio": "2026-06-20",
+    "fecha_vencimiento": "2026-09-20",
+    "activo": true
+  },
+  {
+    "id": "local-4",
+    "nombre": "Bola 8 Bar & Billar",
+    "ciudad": "Cajicá",
+    "telefono": "+57 301 444 9090",
+    "plan": "Mensual",
+    "valor": 100000,
+    "fecha_inicio": "2026-09-28",
+    "fecha_vencimiento": "2026-10-28",
+    "activo": true
+  }
+]
