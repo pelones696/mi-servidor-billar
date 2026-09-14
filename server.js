@@ -29,6 +29,13 @@ function hoyISO() {
   return new Date().toISOString().slice(0, 10);
 }
  
+// ---------- Busca un cliente por ID sin importar mayúsculas/minúsculas ni espacios ----------
+// (así "local-1", "Local-1" y "LOCAL-1" son el mismo, para evitar errores de tipeo)
+function buscarCliente(clientes, id) {
+  const buscado = (id || '').trim().toLowerCase();
+  return clientes.find(c => (c.id || '').trim().toLowerCase() === buscado);
+}
+ 
 // ---------- Revisa vencimientos y desactiva automáticamente los que ya expiraron ----------
 function verificarVencimientos() {
   const clientes = leerClientes();
@@ -56,7 +63,7 @@ verificarVencimientos();
 // ---------- ENDPOINT PRINCIPAL: verificar si un local está activo ----------
 app.get('/api/suscripcion/:id', (req, res) => {
   const clientes = verificarVencimientos(); // revisión perezosa antes de responder
-  const cliente = clientes.find(c => c.id === req.params.id);
+  const cliente = buscarCliente(clientes, req.params.id);
  
   if (!cliente) {
     return res.status(404).json({
@@ -95,7 +102,7 @@ app.get('/api/clientes', (req, res) => {
 // ---------- Activar un local ----------
 app.post('/api/suscripcion/:id/activar', (req, res) => {
   const clientes = leerClientes();
-  const cliente = clientes.find(c => c.id === req.params.id);
+  const cliente = buscarCliente(clientes, req.params.id);
  
   if (!cliente) {
     return res.status(404).json({ ok: false, mensaje: 'Local no encontrado' });
@@ -111,7 +118,7 @@ app.post('/api/suscripcion/:id/activar', (req, res) => {
 // ---------- Desactivar un local ----------
 app.post('/api/suscripcion/:id/desactivar', (req, res) => {
   const clientes = leerClientes();
-  const cliente = clientes.find(c => c.id === req.params.id);
+  const cliente = buscarCliente(clientes, req.params.id);
  
   if (!cliente) {
     return res.status(404).json({ ok: false, mensaje: 'Local no encontrado' });
@@ -127,7 +134,7 @@ app.post('/api/suscripcion/:id/desactivar', (req, res) => {
 // ---------- Actualizar fecha de vencimiento (renovar) ----------
 app.post('/api/suscripcion/:id/renovar', (req, res) => {
   const clientes = leerClientes();
-  const cliente = clientes.find(c => c.id === req.params.id);
+  const cliente = buscarCliente(clientes, req.params.id);
  
   if (!cliente) {
     return res.status(404).json({ ok: false, mensaje: 'Local no encontrado' });
@@ -183,7 +190,7 @@ app.post('/api/clientes', (req, res) => {
 // ---------- Editar datos y fechas de un cliente existente ----------
 app.post('/api/clientes/:id/editar', (req, res) => {
   const clientes = leerClientes();
-  const cliente = clientes.find(c => c.id === req.params.id);
+  const cliente = buscarCliente(clientes, req.params.id);
  
   if (!cliente) {
     return res.status(404).json({ ok: false, mensaje: 'Local no encontrado' });
@@ -240,3 +247,4 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Servidor Billar Class corriendo en puerto ${PORT}`);
 });
+ 
