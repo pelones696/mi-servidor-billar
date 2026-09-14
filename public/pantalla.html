@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billar Class — Mesa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --azul-oscuro:#050f1e;
+    --azul:#0c2b4e;
+    --azul-med:#123a66;
+    --celeste:#29b6f6;
+    --azul-vivo:#1e88e5;
+    --azul-claro:#5fd0ff;
+    --texto:#eef6ff;
+    --texto-sec:#8fa9c4;
+    --panel:#081a30;
+    --panel-2:#0a2138;
+    --borde:rgba(255,255,255,0.09);
+    --verde-ok:#2ecc71;
+    --rojo-mal:#e74c3c;
+    --amarillo:#f1c40f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;user-select:none;}
+  html,body{height:100%;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(41,182,246,0.10) 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(30,136,229,0.14) 0%, transparent 50%),
+      linear-gradient(160deg, var(--azul-oscuro) 0%, #030a15 100%);
+    color:var(--texto);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ============================================================
+     PANTALLA DE ESPERA (antes de que el mostrador dé "Iniciar")
+     ============================================================ */
+  .pantalla-espera{
+    position:fixed;inset:0;z-index:100;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:linear-gradient(160deg, var(--azul-oscuro) 0%, #030a15 100%);
+    text-align:center;
+    padding:20px;
+  }
+  .pantalla-espera .icono-bola{
+    width:96px;height:96px;border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #1a1a1a 0%, #000 55%);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:22px;
+    box-shadow:0 0 40px rgba(41,182,246,0.25);
+    animation:pulso 2s ease-in-out infinite;
+  }
+  .pantalla-espera .icono-bola::after{
+    content:"8";width:38px;height:38px;background:#fff;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;font-weight:800;font-size:19px;color:#111;
+  }
+  @keyframes pulso{
+    0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(41,182,246,0.25);}
+    50%{transform:scale(1.06);box-shadow:0 0 60px rgba(41,182,246,0.4);}
+  }
+  .pantalla-espera h1{
+    font-family:'Poppins',sans-serif;font-weight:800;font-size:34px;
+    background:linear-gradient(90deg, var(--azul-claro), var(--celeste));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    margin-bottom:6px;
+  }
+  .pantalla-espera .nombre-local{
+    font-family:'Poppins',sans-serif;font-size:20px;font-weight:600;color:var(--texto);margin-bottom:16px;
+  }
+  .pantalla-espera .msg-espera{
+    color:var(--texto-sec);font-size:14.5px;display:flex;align-items:center;gap:10px;
+  }
+  .puntos-carga span{
+    width:7px;height:7px;border-radius:50%;background:var(--celeste);display:inline-block;margin:0 2px;
+    animation:parpadeo 1.4s infinite;
+  }
+  .puntos-carga span:nth-child(2){animation-delay:.2s;}
+  .puntos-carga span:nth-child(3){animation-delay:.4s;}
+  @keyframes parpadeo{0%,80%,100%{opacity:.2;}40%{opacity:1;}}
+
+  /* ============================================================
+     PANTALLA ACTIVA (juego en curso)
+     ============================================================ */
+  .pantalla-activa{display:none;padding:16px;max-width:1300px;margin:0 auto;}
+  .pantalla-activa.mostrar{display:block;}
+
+  .fila-superior{
+    display:grid;
+    grid-template-columns:1fr 1.4fr 1fr;
+    gap:16px;
+    align-items:stretch;
+    margin-bottom:14px;
+  }
+
+  /* --- Círculos de jugador --- */
+  .circulo-jugador{
+    border-radius:26px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:18px 10px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    border:3px solid var(--azul-med);
+  }
+  .circulo-jugador.blanca{background:linear-gradient(160deg,#f3f9ff,#d6e9fb);}
+  .circulo-jugador.azul{background:linear-gradient(160deg,var(--azul-vivo),var(--azul-med));}
+  .circulo-jugador .numero{
+    font-family:'Orbitron',sans-serif;font-weight:800;font-size:52px;line-height:1;
+  }
+  .circulo-jugador.blanca .numero{color:#0c2b4e;}
+  .circulo-jugador.azul .numero{color:#fff;}
+  .circulo-jugador .subnumero{font-size:13px;margin-top:6px;font-weight:600;}
+  .circulo-jugador.blanca .subnumero{color:#3a6a99;}
+  .circulo-jugador.azul .subnumero{color:#cfe9ff;}
+
+  /* --- Panel central de valores --- */
+  .panel-valores{
+    background:var(--panel);border:1px solid var(--borde);border-radius:20px;
+    padding:16px 18px;display:flex;flex-direction:column;justify-content:center;gap:10px;
+  }
+  .fila-valor{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .fila-valor .etiqueta{font-size:12px;color:var(--texto-sec);}
+  .fila-valor .caja-valor{
+    background:rgba(255,255,255,0.04);border:1px solid var(--borde);border-radius:9px;
+    padding:6px 12px;font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;
+    color:var(--azul-claro);min-width:100px;text-align:center;
+  }
+  .fila-valor.total .caja-valor{color:var(--celeste);font-size:17px;background:rgba(41,182,246,0.1);border-color:rgba(41,182,246,0.3);}
+  .separador-fina{height:1px;background:var(--borde);margin:2px 0;}
+
+  .contador-mini{display:flex;align-items:center;gap:6px;}
+  .contador-mini .etiqueta{width:110px;}
+  .contador-mini .val{
+    background:rgba(255,255,255,0.04);border:1px solid var(--borde);border-radius:7px;
+    width:34px;text-align:center;font-weight:700;font-size:13px;padding:4px 0;
+  }
+  .btn-mini{
+    width:24px;height:24px;border-radius:6px;border:1px solid var(--borde);
+    background:rgba(255,255,255,0.03);color:var(--texto-sec);font-size:11px;
+    cursor:default;display:flex;align-items:center;justify-content:center;
+  }
+
+  /* --- Timer grande --- */
+  .timer-grande{
+    text-align:center;margin:6px 0 16px;
+    font-family:'Orbitron',sans-serif;font-weight:700;font-size:44px;letter-spacing:2px;
+    color:var(--azul-claro);
+    text-shadow:0 0 20px rgba(41,182,246,0.35);
+  }
+
+  /* --- Caja de cámara --- */
+  .caja-camara{
+    position:relative;
+    border-radius:22px;
+    overflow:hidden;
+    border:3px solid var(--azul-med);
+    background:linear-gradient(160deg,#0a3a2e,#082e24);
+    aspect-ratio:16/7;
+    margin-bottom:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .mesa-ilustracion{
+    width:88%;height:70%;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 40px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 40px),
+      linear-gradient(160deg,#0f7a5e,#0a5a44);
+    border:10px solid #4a3018;
+    border-radius:16px;
+    position:relative;
+    box-shadow:inset 0 0 30px rgba(0,0,0,0.4);
+  }
+  .mesa-ilustracion::before, .mesa-ilustracion::after{
+    content:"";position:absolute;width:16px;height:16px;background:#000;border-radius:50%;
+    top:-13px;left:-13px;
+  }
+  .mesa-ilustracion::after{left:auto;right:-13px;}
+  .bola-mesa{position:absolute;width:16px;height:16px;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.5);}
+  .etiqueta-camara{
+    position:absolute;top:12px;left:14px;
+    background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.15);
+    border-radius:20px;padding:5px 12px;font-size:11.5px;
+    display:flex;align-items:center;gap:6px;color:#fff;
+  }
+  .etiqueta-camara .punto-rec{width:7px;height:7px;border-radius:50%;background:var(--rojo-mal);animation:parpadeo 1.4s infinite;}
+  .selector-retraso{
+    position:absolute;top:12px;right:14px;
+    background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.15);
+    border-radius:20px;padding:5px 10px;font-size:11.5px;color:#fff;
+    display:flex;align-items:center;gap:6px;
+  }
+  .selector-retraso select{
+    background:transparent;border:none;color:#fff;font-size:11.5px;outline:none;
+  }
+  .selector-retraso select option{color:#111;}
+
+  /* --- Fila inferior: controles jugadores + acciones --- */
+  .fila-inferior{
+    display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;
+  }
+  .controles-jugador{display:flex;flex-direction:column;gap:8px;}
+  .controles-jugador .titulo{font-size:12.5px;color:var(--texto-sec);font-weight:600;margin-bottom:2px;}
+  .grid-botones{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-width:180px;}
+  .grid-botones button{
+    padding:12px 0;border:none;border-radius:10px;
+    font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;
+    cursor:default;color:#fff;
+  }
+  .controles-jugador.izq .grid-botones button{background:linear-gradient(160deg,#eef6ff,#c9e4fb);color:#0c2b4e;}
+  .controles-jugador.der .grid-botones button{background:linear-gradient(160deg,var(--azul-vivo),var(--azul-med));}
+  .grid-botones button.ancho{grid-column:span 2;}
+
+  .acciones-centro{display:flex;gap:14px;align-items:center;justify-content:center;}
+  .icono-accion{
+    width:56px;height:56px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;cursor:pointer;border:none;
+    box-shadow:0 8px 20px rgba(0,0,0,0.3);
+    transition:.15s;
+  }
+  .icono-accion:hover{transform:translateY(-2px);}
+  .icono-video{background:var(--panel);border:1px solid var(--borde);color:var(--texto-sec);cursor:default;}
+  .icono-consumo{background:linear-gradient(135deg,var(--celeste),var(--azul-vivo));color:#fff;}
+  .icono-alerta{background:var(--panel);border:1px solid var(--borde);color:var(--texto-sec);cursor:default;}
+
+  .marca-pie{
+    text-align:center;margin-top:18px;color:var(--texto-sec);font-size:12px;letter-spacing:1px;
+  }
+  .marca-pie strong{
+    background:linear-gradient(90deg, var(--azul-claro), var(--celeste));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  /* ============================================================
+     MODAL DE CONSUMO
+     ============================================================ */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);
+    align-items:center;justify-content:center;z-index:150;padding:20px;backdrop-filter:blur(3px);
+  }
+  .modal-overlay.mostrar{display:flex;}
+  .modal-consumo{
+    background:var(--panel-2);border:1px solid var(--borde);border-radius:20px;
+    width:100%;max-width:420px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.55);
+  }
+  .modal-consumo .cab{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .modal-consumo h3{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;}
+  .modal-consumo .cab i{color:var(--texto-sec);cursor:pointer;font-size:16px;}
+  .modal-consumo table{width:100%;border-collapse:collapse;font-size:13px;}
+  .modal-consumo th{text-align:left;color:var(--texto-sec);font-size:11px;text-transform:uppercase;padding:6px 4px;border-bottom:1px solid var(--borde);}
+  .modal-consumo td{padding:9px 4px;border-bottom:1px solid var(--borde);}
+  .modal-consumo .vacio{text-align:center;color:var(--texto-sec);padding:22px 0;font-size:13px;}
+  .modal-consumo .total-modal{
+    display:flex;justify-content:space-between;margin-top:14px;padding-top:14px;
+    border-top:1px solid var(--borde);font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;color:var(--celeste);
+  }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width:900px){
+    .fila-superior{grid-template-columns:1fr;}
+    .circulo-jugador{flex-direction:row;gap:14px;padding:14px;}
+    .fila-inferior{grid-template-columns:1fr;justify-items:center;}
+    .grid-botones{max-width:220px;}
+  }
+  @media (max-width:480px){
+    .timer-grande{font-size:32px;}
+    .circulo-jugador .numero{font-size:38px;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- PANTALLA DE ESPERA -->
+  <div class="pantalla-espera" id="pantallaEspera">
+    <div class="icono-bola"></div>
+    <h1>Billar Class</h1>
+    <div class="nombre-local" id="nombreLocalEspera">Cargando local...</div>
+    <div class="msg-espera">
+      Esperando inicio desde el mostrador
+      <span class="puntos-carga"><span></span><span></span><span></span></span>
+    </div>
+  </div>
+
+  <!-- PANTALLA ACTIVA -->
+  <div class="pantalla-activa" id="pantallaActiva">
+
+    <div class="fila-superior">
+      <div class="circulo-jugador blanca">
+        <div class="numero" id="scoreJ1">0</div>
+        <div class="subnumero">Jugador 1</div>
+      </div>
+
+      <div class="panel-valores">
+        <div class="fila-valor"><span class="etiqueta">Valor tiempo</span><span class="caja-valor" id="pValorTiempo">$0</span></div>
+        <div class="fila-valor"><span class="etiqueta">Valor consumo</span><span class="caja-valor" id="pValorConsumo">$0</span></div>
+        <div class="separador-fina"></div>
+        <div class="fila-valor total"><span class="etiqueta">TOTAL</span><span class="caja-valor" id="pValorTotal">$0</span></div>
+        <div class="separador-fina"></div>
+        <div class="contador-mini">
+          <span class="etiqueta">Entrada</span>
+          <div class="btn-mini">−1</div><div class="val">1</div><div class="btn-mini">+1</div>
+        </div>
+        <div class="contador-mini">
+          <span class="etiqueta">No. carambolas</span>
+          <div class="btn-mini">−1</div><div class="val">0</div><div class="btn-mini">+1</div>
+        </div>
+      </div>
+
+      <div class="circulo-jugador azul">
+        <div class="numero" id="scoreJ2">0</div>
+        <div class="subnumero">Jugador 2</div>
+      </div>
+    </div>
+
+    <div class="timer-grande" id="pTiempo">00:00:00</div>
+
+    <div class="caja-camara">
+      <div class="etiqueta-camara"><span class="punto-rec"></span> Cámara Mesa 1</div>
+      <div class="selector-retraso">
+        <i class="fa-solid fa-clock"></i>
+        <select id="selectorRetraso">
+          <option value="10">Retraso 10s</option>
+          <option value="15">Retraso 15s</option>
+          <option value="20" selected>Retraso 20s</option>
+          <option value="30">Retraso 30s</option>
+        </select>
+      </div>
+      <div class="mesa-ilustracion">
+        <div class="bola-mesa" style="background:#fff;top:35%;left:20%;"></div>
+        <div class="bola-mesa" style="background:#ffcf3a;top:55%;left:60%;"></div>
+        <div class="bola-mesa" style="background:#e74c3c;top:25%;left:75%;"></div>
+      </div>
+    </div>
+
+    <div class="fila-inferior">
+      <div class="controles-jugador izq">
+        <div class="titulo">Jugador 1</div>
+        <div class="grid-botones">
+          <button>−1</button><button>+1</button>
+          <button>+2</button><button>+3</button>
+          <button class="ancho">+4</button>
+        </div>
+      </div>
+
+      <div class="acciones-centro">
+        <button class="icono-accion icono-video" title="Reiniciar video"><i class="fa-solid fa-video"></i></button>
+        <button class="icono-accion icono-consumo" id="btnVerConsumo" title="Ver consumo"><i class="fa-solid fa-sack-dollar"></i></button>
+        <button class="icono-accion icono-alerta" title="Notificar mesero"><i class="fa-solid fa-bell"></i></button>
+      </div>
+
+      <div class="controles-jugador der">
+        <div class="titulo">Jugador 2</div>
+        <div class="grid-botones">
+          <button>−1</button><button>+1</button>
+          <button>+2</button><button>+3</button>
+          <button class="ancho">+4</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="marca-pie"><strong>Billar Class</strong> · Pantalla de Mesa</div>
+  </div>
+
+  <!-- MODAL CONSUMO -->
+  <div class="modal-overlay" id="modalConsumo">
+    <div class="modal-consumo">
+      <div class="cab">
+        <h3>Consumo de la mesa</h3>
+        <i class="fa-solid fa-xmark" id="cerrarModalConsumo"></i>
+      </div>
+      <table>
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Subtotal</th></tr></thead>
+        <tbody id="cuerpoConsumoModal"></tbody>
+      </table>
+      <div class="vacio" id="vacioConsumoModal" style="display:none;">Aún no hay productos agregados</div>
+      <div class="total-modal"><span>Total consumo</span><span id="totalConsumoModal">$0</span></div>
+    </div>
+  </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // ============================================================
+  // ID DE ESTE LOCAL — debe coincidir con el del mostrador (Nivel 2)
+  // ============================================================
+  const LOCAL_ID = "local-1";
+  // ============================================================
+
+  const socket = io();
+  const pantallaEspera = document.getElementById('pantallaEspera');
+  const pantallaActiva = document.getElementById('pantallaActiva');
+  const nombreLocalEspera = document.getElementById('nombreLocalEspera');
+
+  socket.on('connect', () => {
+    socket.emit('unirse-local', LOCAL_ID);
+  });
+
+  // Nombre del local (solo informativo en pantalla de espera)
+  fetch('/api/suscripcion/' + LOCAL_ID)
+    .then(r => r.json())
+    .then(data => {
+      if (data.encontrado) nombreLocalEspera.textContent = data.nombre;
+    })
+    .catch(() => {});
+
+  let ultimoConsumo = [];
+
+  // ---------- Recibe el estado de la mesa en vivo desde el Mostrador ----------
+  socket.on('mesa:actualizar', (data) => {
+    if (data.id !== LOCAL_ID) return;
+
+    if (!data.iniciado) {
+      pantallaActiva.classList.remove('mostrar');
+      pantallaEspera.style.display = 'flex';
+      return;
+    }
+
+    pantallaEspera.style.display = 'none';
+    pantallaActiva.classList.add('mostrar');
+
+    document.getElementById('pTiempo').textContent = data.tiempoTexto || '00:00:00';
+    document.getElementById('pValorTiempo').textContent = formatearMoneda(data.valorTiempo || 0);
+    document.getElementById('pValorConsumo').textContent = formatearMoneda(data.valorConsumo || 0);
+    document.getElementById('pValorTotal').textContent = formatearMoneda(data.valorTotal || 0);
+
+    ultimoConsumo = data.consumo || [];
+  });
+
+  function formatearMoneda(valor){
+    return '$' + Math.round(valor).toLocaleString('es-CO');
+  }
+
+  // ---------- Modal de consumo ----------
+  const modalConsumo = document.getElementById('modalConsumo');
+  const cuerpoConsumoModal = document.getElementById('cuerpoConsumoModal');
+  const vacioConsumoModal = document.getElementById('vacioConsumoModal');
+  const totalConsumoModal = document.getElementById('totalConsumoModal');
+
+  document.getElementById('btnVerConsumo').addEventListener('click', () => {
+    cuerpoConsumoModal.innerHTML = '';
+    let total = 0;
+
+    if (ultimoConsumo.length === 0) {
+      vacioConsumoModal.style.display = 'block';
+    } else {
+      vacioConsumoModal.style.display = 'none';
+      ultimoConsumo.forEach(item => {
+        const subtotal = item.precio * item.cantidad;
+        total += subtotal;
+        const fila = document.createElement('tr');
+        fila.innerHTML = `<td>${item.nombre}</td><td>${item.cantidad}</td><td>${formatearMoneda(subtotal)}</td>`;
+        cuerpoConsumoModal.appendChild(fila);
+      });
+    }
+
+    totalConsumoModal.textContent = formatearMoneda(total);
+    modalConsumo.classList.add('mostrar');
+  });
+
+  document.getElementById('cerrarModalConsumo').addEventListener('click', () => {
+    modalConsumo.classList.remove('mostrar');
+  });
+  modalConsumo.addEventListener('click', (e) => {
+    if (e.target === modalConsumo) modalConsumo.classList.remove('mostrar');
+  });
+
+  // Nota: los botones de +1/-1/+2/+3/+4 de jugadores, entrada y carambolas
+  // son decorativos por ahora (se activarán cuando se implemente la detección
+  // automática de jugadas con IA, en una fase futura).
+</script>
+
+</body>
+</html>

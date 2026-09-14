@@ -5,28 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Billar Class — Mostrador</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
   :root{
-    --verde-oscuro:#0a2e22;
-    --verde:#0f4c37;
-    --verde-claro:#146b4d;
-    --dorado:#d4af37;
-    --dorado-claro:#f0d878;
-    --texto:#eef3f0;
-    --texto-sec:#9fb8ad;
-    --fondo:#0b1512;
-    --panel:#101c18;
-    --panel-2:#0d1815;
-    --borde:rgba(255,255,255,0.08);
+    --azul-oscuro:#050f1e;
+    --azul:#0c2b4e;
+    --azul-med:#123a66;
+    --celeste:#29b6f6;
+    --azul-vivo:#1e88e5;
+    --azul-claro:#5fd0ff;
+    --texto:#eef6ff;
+    --texto-sec:#8fa9c4;
+    --fondo:#040c18;
+    --panel:#081a30;
+    --panel-2:#0a2138;
+    --borde:rgba(255,255,255,0.09);
     --verde-ok:#2ecc71;
     --rojo-mal:#e74c3c;
+    --amarillo:#f1c40f;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{
     font-family:'Inter',sans-serif;
-    background:var(--fondo);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(41,182,246,0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 100%, rgba(30,136,229,0.12) 0%, transparent 45%),
+      var(--fondo);
     color:var(--texto);
     min-height:100vh;
   }
@@ -35,66 +40,79 @@
   .topbar{
     display:flex;justify-content:space-between;align-items:center;
     padding:16px 26px;
-    background:linear-gradient(180deg, var(--verde-oscuro), #071b14);
+    background:linear-gradient(180deg, var(--azul), #061225);
     border-bottom:1px solid var(--borde);
-    flex-wrap:wrap;gap:10px;
+    flex-wrap:wrap;gap:12px;
   }
   .marca{display:flex;align-items:center;gap:12px;}
   .icono-bola{
-    width:36px;height:36px;border-radius:50%;
+    width:38px;height:38px;border-radius:50%;
     background:radial-gradient(circle at 32% 28%, #1a1a1a 0%, #000 55%);
     display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
   .icono-bola::after{
-    content:"8";width:15px;height:15px;background:#fff;border-radius:50%;
+    content:"8";width:16px;height:16px;background:#fff;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     font-family:'Poppins',sans-serif;font-weight:800;font-size:9px;color:#111;
   }
   .marca h1{
-    font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;
-    background:linear-gradient(90deg, var(--dorado-claro), var(--dorado));
+    font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;
+    background:linear-gradient(90deg, var(--azul-claro), var(--celeste));
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
   .marca .sub{font-size:12px;color:var(--texto-sec);}
+
+  .topbar-derecha{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+
+  .chip-suscripcion{
+    display:flex;align-items:center;gap:8px;
+    font-size:12.5px;color:var(--texto-sec);
+    background:var(--panel);border:1px solid var(--borde);
+    padding:8px 14px;border-radius:20px;
+  }
+  .chip-suscripcion.ok{border-color:rgba(46,204,113,0.35);color:#8fe8b0;}
+  .chip-suscripcion.alerta{border-color:rgba(241,196,15,0.4);color:#ffe08a;}
+  .chip-suscripcion.vencida{border-color:rgba(231,76,60,0.4);color:#ff9a90;}
 
   .estado-conexion{
     display:flex;align-items:center;gap:8px;
     font-size:12.5px;color:var(--texto-sec);
     background:var(--panel);border:1px solid var(--borde);
-    padding:7px 14px;border-radius:20px;
+    padding:8px 14px;border-radius:20px;
   }
   .punto-estado{width:8px;height:8px;border-radius:50%;background:var(--rojo-mal);transition:.2s;}
   .punto-estado.conectado{background:var(--verde-ok);box-shadow:0 0 6px var(--verde-ok);}
 
   /* ---------- CONTENIDO ---------- */
   .contenido{
-    max-width:1100px;margin:0 auto;
+    max-width:1140px;margin:0 auto;
     padding:26px 20px 60px;
     display:grid;
-    grid-template-columns:1.1fr 1.4fr;
+    grid-template-columns:1.05fr 1.4fr;
     gap:20px;
   }
 
   .panel-box{
     background:var(--panel);
     border:1px solid var(--borde);
-    border-radius:16px;
+    border-radius:18px;
     padding:22px;
   }
   .panel-box h2{
     font-family:'Poppins',sans-serif;font-size:15.5px;font-weight:600;
     margin-bottom:18px;display:flex;align-items:center;gap:9px;
   }
-  .panel-box h2 i{color:var(--dorado);}
+  .panel-box h2 i{color:var(--celeste);}
 
   /* ---------- TIEMPO ---------- */
   .reloj{
-    font-family:'Poppins',sans-serif;
-    font-size:46px;font-weight:700;
+    font-family:'Orbitron',sans-serif;
+    font-size:44px;font-weight:700;
     text-align:center;
     letter-spacing:1px;
     margin:8px 0 6px;
-    color:var(--dorado-claro);
+    color:var(--azul-claro);
+    text-shadow:0 0 18px rgba(41,182,246,0.25);
   }
   .reloj-sub{text-align:center;color:var(--texto-sec);font-size:12.5px;margin-bottom:18px;}
 
@@ -108,12 +126,12 @@
     background:rgba(0,0,0,0.25);border:1px solid var(--borde);
     color:var(--texto);font-size:13px;outline:none;text-align:right;
   }
-  .fila-tarifa input:focus{border-color:var(--dorado);}
+  .fila-tarifa input:focus{border-color:var(--celeste);}
 
   .valor-tiempo{
     text-align:center;font-size:14px;color:var(--texto-sec);margin-bottom:20px;
   }
-  .valor-tiempo strong{color:var(--dorado-claro);font-size:17px;}
+  .valor-tiempo strong{color:var(--azul-claro);font-size:17px;}
 
   .btns-tiempo{display:flex;gap:10px;}
   .btn{
@@ -122,7 +140,7 @@
     cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
     transition:.15s;
   }
-  .btn-iniciar{background:linear-gradient(90deg, var(--verde-ok), #229954);color:#fff;}
+  .btn-iniciar{background:linear-gradient(90deg, var(--celeste), var(--azul-vivo));color:#fff;box-shadow:0 8px 20px rgba(41,182,246,0.25);}
   .btn-detener{background:linear-gradient(90deg, var(--rojo-mal), #a93226);color:#fff;}
   .btn-reiniciar{background:transparent;border:1px solid var(--borde);color:var(--texto-sec);flex:0 0 auto;width:48px;}
   .btn:hover{transform:translateY(-1px);}
@@ -141,8 +159,8 @@
     transition:.15s;
     text-align:center;
   }
-  .producto-rapido:hover{background:rgba(212,175,55,0.08);border-color:rgba(212,175,55,0.3);}
-  .producto-rapido i{font-size:20px;color:var(--dorado-claro);margin-bottom:6px;display:block;}
+  .producto-rapido:hover{background:rgba(41,182,246,0.08);border-color:rgba(41,182,246,0.3);}
+  .producto-rapido i{font-size:20px;color:var(--azul-claro);margin-bottom:6px;display:block;}
   .producto-rapido .nombre{font-size:12.5px;font-weight:600;margin-bottom:4px;}
   .producto-rapido .precio-edit{
     display:flex;align-items:center;justify-content:center;gap:4px;
@@ -150,10 +168,10 @@
   .producto-rapido .precio-edit span{font-size:11.5px;color:var(--texto-sec);}
   .producto-rapido input{
     width:70px;background:rgba(0,0,0,0.3);border:1px solid var(--borde);
-    border-radius:6px;color:var(--dorado-claro);font-size:11.5px;
+    border-radius:6px;color:var(--azul-claro);font-size:11.5px;
     padding:3px 5px;text-align:center;outline:none;
   }
-  .producto-rapido input:focus{border-color:var(--dorado);}
+  .producto-rapido input:focus{border-color:var(--celeste);}
 
   /* ---------- FORM MANUAL ---------- */
   .form-manual{
@@ -164,9 +182,9 @@
     background:rgba(0,0,0,0.25);border:1px solid var(--borde);
     color:var(--texto);font-size:13px;outline:none;width:100%;
   }
-  .form-manual input:focus{border-color:var(--dorado);}
+  .form-manual input:focus{border-color:var(--celeste);}
   .form-manual button{
-    background:var(--dorado);border:none;border-radius:9px;color:#1a1400;
+    background:linear-gradient(135deg,var(--celeste),var(--azul-vivo));border:none;border-radius:9px;color:#fff;
     width:40px;font-size:15px;cursor:pointer;
   }
 
@@ -186,13 +204,13 @@
     margin-top:16px;padding-top:16px;border-top:1px solid var(--borde);
   }
   .fila-total{display:flex;justify-content:space-between;font-size:13.5px;color:var(--texto-sec);margin-bottom:8px;}
-  .fila-total.grande{font-size:19px;font-weight:700;color:var(--dorado-claro);font-family:'Poppins',sans-serif;margin-top:10px;}
+  .fila-total.grande{font-size:19px;font-weight:700;color:var(--celeste);font-family:'Poppins',sans-serif;margin-top:10px;}
 
   /* ---------- OVERLAY DE BLOQUEO ---------- */
   .overlay-bloqueo{
     display:none;
     position:fixed;inset:0;z-index:200;
-    background:rgba(4,10,8,0.94);
+    background:rgba(2,7,14,0.95);
     backdrop-filter:blur(6px);
     align-items:center;justify-content:center;
     padding:24px;
@@ -228,7 +246,7 @@
     border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--texto-sec);
     margin-bottom:6px;
   }
-  .caja-bloqueo .ref strong{color:var(--dorado-claro);}
+  .caja-bloqueo .ref strong{color:var(--azul-claro);}
 
   /* ---------- RESPONSIVE ---------- */
   @media (max-width:800px){
@@ -238,6 +256,7 @@
     .form-manual{grid-template-columns:1fr 1fr;}
     .form-manual button{grid-column:span 2;width:100%;}
     .reloj{font-size:36px;}
+    .topbar-derecha{width:100%;justify-content:space-between;}
   }
 </style>
 </head>
@@ -251,9 +270,15 @@
       <div class="sub" id="nombreLocal">Cargando local...</div>
     </div>
   </div>
-  <div class="estado-conexion">
-    <span class="punto-estado" id="puntoEstado"></span>
-    <span id="textoEstado">Conectando...</span>
+  <div class="topbar-derecha">
+    <div class="chip-suscripcion" id="chipSuscripcion">
+      <i class="fa-solid fa-calendar-check"></i>
+      <span id="textoSuscripcion">Consultando suscripción...</span>
+    </div>
+    <div class="estado-conexion">
+      <span class="punto-estado" id="puntoEstado"></span>
+      <span id="textoEstado">Conectando...</span>
+    </div>
   </div>
 </div>
 
@@ -365,6 +390,8 @@
   const nombreLocalEl = document.getElementById('nombreLocal');
   const nombreLocalBloqueo = document.getElementById('nombreLocalBloqueo');
   const refPago = document.getElementById('refPago');
+  const chipSuscripcion = document.getElementById('chipSuscripcion');
+  const textoSuscripcion = document.getElementById('textoSuscripcion');
 
   function generarQr(texto){
     const url = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(texto);
@@ -382,28 +409,50 @@
     overlay.classList.remove('activo');
   }
 
+  function actualizarChipSuscripcion(activo, dias){
+    chipSuscripcion.classList.remove('ok','alerta','vencida');
+    if(!activo){
+      chipSuscripcion.classList.add('vencida');
+      textoSuscripcion.textContent = 'Suscripción vencida';
+    } else if(dias !== null && dias <= 5){
+      chipSuscripcion.classList.add('alerta');
+      textoSuscripcion.textContent = dias <= 0 ? 'Vence hoy' : `Vence en ${dias} día${dias===1?'':'s'}`;
+    } else {
+      chipSuscripcion.classList.add('ok');
+      textoSuscripcion.textContent = dias !== null ? `Activa · ${dias} días restantes` : 'Suscripción activa';
+    }
+  }
+
   // ---------- Estado inicial: consulta al servidor ----------
-  fetch('/api/suscripcion/' + LOCAL_ID)
-    .then(r => r.json())
-    .then(data => {
-      if(!data.encontrado){
-        nombreLocalEl.textContent = 'Local no registrado (' + LOCAL_ID + ')';
-        mostrarBloqueo(LOCAL_ID);
-        return;
-      }
-      nombreLocalEl.textContent = data.nombre + ' (' + LOCAL_ID + ')';
-      if(!data.activo){
-        mostrarBloqueo(data.nombre);
-      }
-    })
-    .catch(() => {
-      textoEstado.textContent = 'Sin conexión al servidor';
-    });
+  function consultarSuscripcion(){
+    fetch('/api/suscripcion/' + LOCAL_ID)
+      .then(r => r.json())
+      .then(data => {
+        if(!data.encontrado){
+          nombreLocalEl.textContent = 'Local no registrado (' + LOCAL_ID + ')';
+          mostrarBloqueo(LOCAL_ID);
+          return;
+        }
+        nombreLocalEl.textContent = data.nombre + ' (' + LOCAL_ID + ')';
+        actualizarChipSuscripcion(data.activo, data.dias_restantes);
+        if(!data.activo){
+          mostrarBloqueo(data.nombre);
+        } else {
+          ocultarBloqueo();
+        }
+      })
+      .catch(() => {
+        textoEstado.textContent = 'Sin conexión al servidor';
+      });
+  }
+  consultarSuscripcion();
+  setInterval(consultarSuscripcion, 60000); // revisa cada minuto (por si cambia el día)
 
   // ---------- Conexión en vivo ----------
   socket.on('connect', () => {
     puntoEstado.classList.add('conectado');
     textoEstado.textContent = 'Conectado en vivo';
+    socket.emit('unirse-local', LOCAL_ID);
   });
 
   socket.on('disconnect', () => {
@@ -413,20 +462,22 @@
 
   // ---------- Escuchar cambios de suscripción EN VIVO ----------
   socket.on('suscripcion:actualizada', (data) => {
-    if(data.id !== LOCAL_ID) return; // solo nos interesa nuestro propio local
+    if(data.id !== LOCAL_ID) return;
 
     if(data.activo){
       ocultarBloqueo();
     } else {
       mostrarBloqueo(data.nombre);
     }
+    consultarSuscripcion();
   });
 
   // ============================================================
-  // TIEMPO DE MESA (cronómetro)
+  // TIEMPO DE MESA (cronómetro) — también transmite a la Pantalla Táctil
   // ============================================================
   let segundos = 0;
   let corriendo = false;
+  let iniciado = false; // true desde que se presiona Iniciar por primera vez (hasta Reiniciar)
   let intervalo = null;
 
   const relojEl = document.getElementById('reloj');
@@ -444,12 +495,29 @@
     return `${h}:${m}:${s}`;
   }
 
-  function actualizarValorTiempo(){
+  function valorTiempoActual(){
     const tarifa = parseFloat(tarifaHoraInput.value) || 0;
-    const valor = Math.round((segundos/3600) * tarifa);
+    return Math.round((segundos/3600) * tarifa);
+  }
+
+  function actualizarValorTiempo(){
+    const valor = valorTiempoActual();
     valorTiempoEl.textContent = '$' + valor.toLocaleString('es-CO');
     document.getElementById('totalTiempo').textContent = '$' + valor.toLocaleString('es-CO');
     actualizarTotalGeneral(valor);
+    transmitirEstado();
+  }
+
+  function transmitirEstado(){
+    socket.emit('mesa:actualizar', {
+      id: LOCAL_ID,
+      iniciado: iniciado,
+      tiempoTexto: formatearTiempo(segundos),
+      valorTiempo: ultimoValorTiempo,
+      valorConsumo: ultimoValorProductos,
+      valorTotal: ultimoValorTiempo + ultimoValorProductos,
+      consumo: consumo
+    });
   }
 
   function tick(){
@@ -461,10 +529,12 @@
   btnIniciar.addEventListener('click', () => {
     if(corriendo) return;
     corriendo = true;
+    iniciado = true;
     intervalo = setInterval(tick, 1000);
     btnIniciar.disabled = true;
     btnDetener.disabled = false;
     estadoTiempoEl.textContent = 'Tiempo corriendo...';
+    transmitirEstado();
   });
 
   btnDetener.addEventListener('click', () => {
@@ -473,10 +543,12 @@
     btnIniciar.disabled = false;
     btnDetener.disabled = true;
     estadoTiempoEl.textContent = 'Tiempo detenido';
+    transmitirEstado();
   });
 
   btnReiniciar.addEventListener('click', () => {
     corriendo = false;
+    iniciado = false;
     clearInterval(intervalo);
     segundos = 0;
     relojEl.textContent = '00:00:00';
@@ -540,6 +612,7 @@
 
     totalProductosEl.textContent = '$' + totalProductos.toLocaleString('es-CO');
     actualizarTotalGeneral(null, totalProductos);
+    transmitirEstado();
   }
 
   let ultimoValorTiempo = 0;
