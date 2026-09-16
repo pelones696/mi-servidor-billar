@@ -308,6 +308,38 @@
   }
   .icon-btn:hover{color:var(--dorado);}
   .icon-btn.borrar:hover{color:var(--rojo-mal);}
+  .icon-btn.cobrar:hover{color:var(--verde-ok);}
+
+  /* ---------- MODAL ANCHO (pagos / renovar) ---------- */
+  .modal.ancho{max-width:560px;}
+  .resumen-cliente-modal{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
+    background:rgba(255,255,255,0.03);border:1px solid var(--borde);border-radius:12px;
+    padding:14px 16px;margin-bottom:18px;
+  }
+  .resumen-cliente-modal .nombre{font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;}
+  .resumen-cliente-modal .sub{color:var(--texto-sec);font-size:12.5px;margin-top:2px;}
+
+  .lista-meses{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
+  .fila-mes{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:12px 14px;border-radius:10px;border:1px solid var(--borde);background:rgba(255,255,255,0.02);
+  }
+  .fila-mes .etiqueta-mes{font-weight:600;font-size:13.5px;}
+  .fila-mes .monto-mes{color:var(--texto-sec);font-size:12px;margin-top:2px;}
+  .pill-mes{
+    display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;
+    font-size:11.5px;font-weight:600;white-space:nowrap;
+  }
+  .pill-mes.pagado{background:rgba(46,204,113,0.14);color:var(--verde-ok);}
+  .pill-mes.pendiente{background:rgba(231,76,60,0.14);color:#ff8a80;}
+  .fila-mes .acciones-mes{display:flex;align-items:center;gap:12px;}
+  .fila-mes .icon-btn{font-size:13px;}
+
+  .campo-solo-lectura{
+    padding:11px 13px;border-radius:9px;background:rgba(255,255,255,0.03);
+    border:1px solid var(--borde);color:var(--texto-sec);font-size:13.5px;
+  }
 
   /* ---------- MODAL ---------- */
   .modal-overlay{
@@ -407,7 +439,7 @@
     <div style="display:flex;gap:12px;flex-wrap:wrap;">
       <div class="buscador">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" placeholder="Buscar tienda...">
+        <input type="text" id="inputBuscar" placeholder="Buscar tienda...">
       </div>
       <button class="btn-dorado" id="btnNuevoCliente">
         <i class="fa-solid fa-plus"></i> Agregar Cliente
@@ -419,22 +451,22 @@
   <div class="stats">
     <div class="stat-card">
       <div class="icono ic-total"><i class="fa-solid fa-shop"></i></div>
-      <div class="valor">12</div>
+      <div class="valor" id="statTotal">—</div>
       <div class="etiqueta">Tiendas Registradas</div>
     </div>
     <div class="stat-card">
       <div class="icono ic-activas"><i class="fa-solid fa-circle-check"></i></div>
-      <div class="valor">9</div>
+      <div class="valor" id="statActivas">—</div>
       <div class="etiqueta">Suscripciones Activas</div>
     </div>
     <div class="stat-card">
       <div class="icono ic-vencidas"><i class="fa-solid fa-triangle-exclamation"></i></div>
-      <div class="valor">3</div>
+      <div class="valor" id="statVencidas">—</div>
       <div class="etiqueta">Suscripciones Vencidas</div>
     </div>
     <div class="stat-card">
       <div class="icono ic-ingresos"><i class="fa-solid fa-sack-dollar"></i></div>
-      <div class="valor">$900.000</div>
+      <div class="valor" id="statIngresos">—</div>
       <div class="etiqueta">Ingresos del Mes (COP)</div>
     </div>
   </div>
@@ -444,10 +476,10 @@
     <div class="encabezado">
       <h3>Todas las tiendas</h3>
       <div class="filtros">
-        <div class="chip activo">Todas</div>
-        <div class="chip">Activas</div>
-        <div class="chip">Vencidas</div>
-        <div class="chip">Por vencer</div>
+        <div class="chip activo" data-filtro="todas">Todas</div>
+        <div class="chip" data-filtro="activas">Activas</div>
+        <div class="chip" data-filtro="vencidas">Vencidas</div>
+        <div class="chip" data-filtro="pronto">Por vencer</div>
       </div>
     </div>
 
@@ -581,6 +613,78 @@
   </div>
 </div>
 
+<!-- MODAL VER PAGOS -->
+<div class="modal-overlay" id="modalPagosOverlay">
+  <div class="modal ancho">
+    <div class="modal-head">
+      <h3>Historial de Pagos</h3>
+      <i class="fa-solid fa-xmark" id="cerrarModalPagos"></i>
+    </div>
+
+    <div class="resumen-cliente-modal">
+      <div>
+        <div class="nombre" id="pagosNombreCliente">—</div>
+        <div class="sub" id="pagosSubCliente">—</div>
+      </div>
+    </div>
+
+    <div class="lista-meses" id="listaMeses">
+      <div style="text-align:center;color:var(--texto-sec);padding:20px;">Cargando historial...</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secundario" id="cerrarPagosFooter">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RENOVAR / COBRAR -->
+<div class="modal-overlay" id="modalRenovarOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Renovar y Registrar Pago</h3>
+      <i class="fa-solid fa-xmark" id="cerrarModalRenovar"></i>
+    </div>
+
+    <input type="hidden" id="renovarId">
+
+    <div class="resumen-cliente-modal">
+      <div>
+        <div class="nombre" id="renovarNombreCliente">—</div>
+        <div class="sub" id="renovarSubCliente">—</div>
+      </div>
+    </div>
+
+    <div class="form-fila">
+      <div class="form-grupo">
+        <label>Monto cobrado (COP)</label>
+        <input type="number" id="renovarMonto">
+      </div>
+      <div class="form-grupo">
+        <label>Fecha de pago</label>
+        <input type="date" id="renovarFechaPago">
+      </div>
+    </div>
+
+    <div class="form-grupo">
+      <label>Concepto</label>
+      <input type="text" id="renovarConcepto">
+    </div>
+
+    <div class="form-grupo">
+      <label>Nueva fecha de vencimiento</label>
+      <input type="date" id="renovarFechaVencimiento">
+    </div>
+
+    <p id="errorRenovar" style="color:var(--rojo-mal);font-size:12.5px;margin-top:-6px;display:none;"></p>
+
+    <div class="modal-footer">
+      <button class="btn-secundario" id="cancelarModalRenovar">Cancelar</button>
+      <button class="btn-dorado" id="btnConfirmarRenovar"><i class="fa-solid fa-file-invoice-dollar"></i> Cobrar y Generar Recibo</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Menú móvil
   const sidebar = document.getElementById('sidebar');
@@ -649,6 +753,7 @@
         if(resp.ok){
           modal.classList.remove('mostrar');
           cargarClientes();
+          cargarEstadisticas();
         } else {
           errorEl.textContent = resp.mensaje || 'No se pudo agregar el cliente.';
           errorEl.style.display = 'block';
@@ -709,6 +814,7 @@
         if(resp.ok){
           modalEditar.classList.remove('mostrar');
           cargarClientes();
+          cargarEstadisticas();
         } else {
           errorEl.textContent = resp.mensaje || 'No se pudo guardar los cambios.';
           errorEl.style.display = 'block';
@@ -725,18 +831,35 @@
     window.location.href = 'index.html';
   });
 
-  // Filtros (solo visual por ahora)
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('activo'));
-      chip.classList.add('activo');
-    });
-  });
+  // Duración de cada plan en meses (para calcular fechas de vencimiento sugeridas)
+  const MESES_POR_PLAN = { 'Mensual': 1, 'Trimestral': 3, 'Anual': 12 };
 
   // ============================================================
-  // CARGAR CLIENTES REALES DESDE EL SERVIDOR Y CONECTAR SWITCHES
+  // ESTADÍSTICAS DEL DASHBOARD (tarjetas de arriba) — reales, desde el servidor
+  // ============================================================
+  function formatearCOP(numero){
+    return '$' + Number(numero || 0).toLocaleString('es-CO');
+  }
+
+  function cargarEstadisticas(){
+    fetch('/api/estadisticas')
+      .then(r => r.json())
+      .then(datos => {
+        document.getElementById('statTotal').textContent = datos.tiendas_registradas;
+        document.getElementById('statActivas').textContent = datos.suscripciones_activas;
+        document.getElementById('statVencidas').textContent = datos.suscripciones_vencidas;
+        document.getElementById('statIngresos').textContent = formatearCOP(datos.ingresos_mes);
+      })
+      .catch(() => { /* si falla, las tarjetas se quedan con el último valor conocido */ });
+  }
+
+  // ============================================================
+  // CARGAR CLIENTES REALES DESDE EL SERVIDOR Y CONECTAR TODO
   // ============================================================
   const tbody = document.getElementById('tablaClientes');
+  let ultimosClientes = [];
+  let filtroActual = 'todas';
+  const DIAS_PRONTO_A_VENCER = 7;
 
   function formatearFecha(fechaISO){
     if(!fechaISO) return '—';
@@ -745,86 +868,301 @@
     return `${dia} ${meses[parseInt(mes)-1]} ${anio}`;
   }
 
-  function badgeEstado(activo){
-    return activo
-      ? '<span class="badge ok"><span class="punto"></span> Activo</span>'
-      : '<span class="badge vencido"><span class="punto"></span> Vencido</span>';
+  // Además de activo/vencido, calcula "por vencer" cuando faltan pocos días
+  function estadoCliente(c){
+    if(!c.activo) return 'vencido';
+    if(c.fecha_vencimiento){
+      const msPorDia = 1000 * 60 * 60 * 24;
+      const dias = Math.ceil((new Date(c.fecha_vencimiento) - new Date(new Date().toISOString().slice(0,10))) / msPorDia);
+      if(dias <= DIAS_PRONTO_A_VENCER) return 'pronto';
+    }
+    return 'activo';
+  }
+
+  function badgeEstado(estado){
+    if(estado === 'vencido') return '<span class="badge vencido"><span class="punto"></span> Vencido</span>';
+    if(estado === 'pronto') return '<span class="badge pronto"><span class="punto"></span> Por vencer</span>';
+    return '<span class="badge ok"><span class="punto"></span> Activo</span>';
+  }
+
+  function clientesFiltrados(){
+    const texto = (document.getElementById('inputBuscar').value || '').trim().toLowerCase();
+    return ultimosClientes.filter(c => {
+      const estado = estadoCliente(c);
+      const pasaFiltro =
+        filtroActual === 'todas' ? true :
+        filtroActual === 'activas' ? (estado === 'activo' || estado === 'pronto') :
+        filtroActual === 'vencidas' ? estado === 'vencido' :
+        filtroActual === 'pronto' ? estado === 'pronto' : true;
+      if(!pasaFiltro) return false;
+      if(!texto) return true;
+      return (c.nombre || '').toLowerCase().includes(texto) ||
+             (c.ciudad || '').toLowerCase().includes(texto) ||
+             (c.id || '').toLowerCase().includes(texto);
+    });
+  }
+
+  function renderizarTabla(){
+    const clientes = clientesFiltrados();
+    tbody.innerHTML = '';
+
+    if(clientes.length === 0){
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--texto-sec);padding:26px;">No hay tiendas que coincidan</td></tr>';
+      return;
+    }
+
+    clientes.forEach(c => {
+      const estado = estadoCliente(c);
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>
+          <div class="tienda-cell">
+            <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
+            <div>
+              <div class="tienda-nombre">${c.nombre}</div>
+              <div class="tienda-sub">${c.ciudad || '—'} · ${c.id}</div>
+            </div>
+          </div>
+        </td>
+        <td>${c.telefono || '—'}</td>
+        <td>${c.plan}</td>
+        <td>${formatearFecha(c.fecha_vencimiento)}</td>
+        <td class="celda-estado">${badgeEstado(estado)}</td>
+        <td><label class="switch"><input type="checkbox" data-id="${c.id}" ${c.activo ? 'checked' : ''}><span class="slider"></span></label></td>
+        <td>
+          <div class="acciones">
+            <i class="fa-solid fa-rotate icon-btn cobrar" title="Renovar y generar recibo" data-id="${c.id}"></i>
+            <i class="fa-solid fa-pen icon-btn" title="Editar" data-id="${c.id}"></i>
+            <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos" data-id="${c.id}"></i>
+            <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar" data-id="${c.id}"></i>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(fila);
+    });
+
+    // Editar
+    tbody.querySelectorAll('.fa-pen').forEach(icono => {
+      icono.addEventListener('click', () => {
+        const cliente = ultimosClientes.find(c => c.id === icono.dataset.id);
+        if(cliente) abrirModalEditar(cliente);
+      });
+    });
+
+    // Ver pagos
+    tbody.querySelectorAll('.fa-file-invoice').forEach(icono => {
+      icono.addEventListener('click', () => abrirModalPagos(icono.dataset.id));
+    });
+
+    // Renovar y generar recibo
+    tbody.querySelectorAll('.icon-btn.cobrar').forEach(icono => {
+      icono.addEventListener('click', () => {
+        const cliente = ultimosClientes.find(c => c.id === icono.dataset.id);
+        if(cliente) abrirModalRenovar(cliente);
+      });
+    });
+
+    // Eliminar
+    tbody.querySelectorAll('.icon-btn.borrar').forEach(icono => {
+      icono.addEventListener('click', () => {
+        const cliente = ultimosClientes.find(c => c.id === icono.dataset.id);
+        if(!cliente) return;
+        if(!confirm(`¿Eliminar definitivamente a "${cliente.nombre}"? Esta acción no se puede deshacer.`)) return;
+        fetch(`/api/clientes/${cliente.id}`, { method: 'DELETE' })
+          .then(r => r.json())
+          .then(resp => {
+            if(resp.ok){ cargarClientes(); cargarEstadisticas(); }
+            else alert(resp.mensaje || 'No se pudo eliminar.');
+          })
+          .catch(() => alert('No se pudo conectar con el servidor.'));
+      });
+    });
+
+    // Activar / desactivar (interruptor rápido, sin registrar pago)
+    tbody.querySelectorAll('.switch input').forEach(input => {
+      input.addEventListener('change', () => {
+        const id = input.dataset.id;
+        const accion = input.checked ? 'activar' : 'desactivar';
+
+        fetch(`/api/suscripcion/${id}/${accion}`, { method: 'POST' })
+          .then(r => r.json())
+          .then(resp => {
+            if(resp.ok){
+              const cliente = ultimosClientes.find(c => c.id === id);
+              if(cliente) cliente.activo = input.checked;
+              const fila = input.closest('tr');
+              fila.querySelector('.celda-estado').innerHTML = badgeEstado(cliente ? estadoCliente(cliente) : (input.checked ? 'activo' : 'vencido'));
+              cargarEstadisticas();
+            }
+          })
+          .catch(() => {
+            alert('No se pudo conectar con el servidor. Intenta de nuevo.');
+            input.checked = !input.checked; // revertir si falló
+          });
+      });
+    });
   }
 
   function cargarClientes(){
     fetch('/api/clientes')
       .then(r => r.json())
       .then(clientes => {
-        tbody.innerHTML = '';
-
-        if(clientes.length === 0){
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--texto-sec);padding:26px;">No hay clientes registrados aún</td></tr>';
-          return;
-        }
-
-        clientes.forEach(c => {
-          const fila = document.createElement('tr');
-          fila.innerHTML = `
-            <td>
-              <div class="tienda-cell">
-                <div class="tienda-icono"><i class="fa-solid fa-shop"></i></div>
-                <div>
-                  <div class="tienda-nombre">${c.nombre}</div>
-                  <div class="tienda-sub">${c.ciudad || '—'} · ${c.id}</div>
-                </div>
-              </div>
-            </td>
-            <td>${c.telefono || '—'}</td>
-            <td>${c.plan}</td>
-            <td>${formatearFecha(c.fecha_vencimiento)}</td>
-            <td class="celda-estado">${badgeEstado(c.activo)}</td>
-            <td><label class="switch"><input type="checkbox" data-id="${c.id}" ${c.activo ? 'checked' : ''}><span class="slider"></span></label></td>
-            <td>
-              <div class="acciones">
-                <i class="fa-solid fa-pen icon-btn" title="Editar" data-id="${c.id}"></i>
-                <i class="fa-solid fa-file-invoice icon-btn" title="Ver pagos"></i>
-                <i class="fa-solid fa-trash icon-btn borrar" title="Eliminar"></i>
-              </div>
-            </td>
-          `;
-          tbody.appendChild(fila);
-        });
-
-        // Conectar el ícono de editar con el modal de edición
-        tbody.querySelectorAll('.fa-pen').forEach(icono => {
-          icono.addEventListener('click', () => {
-            const cliente = clientes.find(c => c.id === icono.dataset.id);
-            if(cliente) abrirModalEditar(cliente);
-          });
-        });
-
-        // Conectar cada switch con la API real
-        tbody.querySelectorAll('.switch input').forEach(input => {
-          input.addEventListener('change', () => {
-            const id = input.dataset.id;
-            const accion = input.checked ? 'activar' : 'desactivar';
-
-            fetch(`/api/suscripcion/${id}/${accion}`, { method: 'POST' })
-              .then(r => r.json())
-              .then(resp => {
-                if(resp.ok){
-                  const fila = input.closest('tr');
-                  fila.querySelector('.celda-estado').innerHTML = badgeEstado(input.checked);
-                }
-              })
-              .catch(() => {
-                alert('No se pudo conectar con el servidor. Intenta de nuevo.');
-                input.checked = !input.checked; // revertir si falló
-              });
-          });
-        });
+        ultimosClientes = clientes;
+        renderizarTabla();
       })
       .catch(() => {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--texto-sec);padding:26px;">No se pudo conectar con el servidor</td></tr>';
       });
   }
 
+  // Filtros y buscador ya wireados a la tabla real
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('activo'));
+      chip.classList.add('activo');
+      filtroActual = chip.dataset.filtro || 'todas';
+      renderizarTabla();
+    });
+  });
+  document.getElementById('inputBuscar').addEventListener('input', renderizarTabla);
+
+  // ============================================================
+  // MODAL VER PAGOS — calendario/lista de estado por mes + recibos
+  // ============================================================
+  const modalPagos = document.getElementById('modalPagosOverlay');
+  function cerrarModalPagos(){ modalPagos.classList.remove('mostrar'); }
+  document.getElementById('cerrarModalPagos').addEventListener('click', cerrarModalPagos);
+  document.getElementById('cerrarPagosFooter').addEventListener('click', cerrarModalPagos);
+  modalPagos.addEventListener('click', (e) => { if(e.target === modalPagos) cerrarModalPagos(); });
+
+  function abrirModalPagos(id){
+    document.getElementById('pagosNombreCliente').textContent = 'Cargando...';
+    document.getElementById('pagosSubCliente').textContent = '';
+    document.getElementById('listaMeses').innerHTML = '<div style="text-align:center;color:var(--texto-sec);padding:20px;">Cargando historial...</div>';
+    modalPagos.classList.add('mostrar');
+
+    fetch(`/api/clientes/${id}/pagos`)
+      .then(r => r.json())
+      .then(datos => {
+        if(!datos.ok) throw new Error();
+        document.getElementById('pagosNombreCliente').textContent = datos.cliente.nombre;
+        document.getElementById('pagosSubCliente').textContent = `${datos.cliente.ciudad || '—'} · Plan ${datos.cliente.plan}`;
+
+        const cont = document.getElementById('listaMeses');
+        cont.innerHTML = '';
+
+        if(datos.meses.length === 0){
+          cont.innerHTML = '<div style="text-align:center;color:var(--texto-sec);padding:20px;">Todavía no hay historial para esta tienda.</div>';
+          return;
+        }
+
+        datos.meses.forEach(m => {
+          const fila = document.createElement('div');
+          fila.className = 'fila-mes';
+          const pillClase = m.estado === 'pagado' ? 'pagado' : 'pendiente';
+          const pillTexto = m.estado === 'pagado' ? 'Pagó' : 'Pendiente';
+          fila.innerHTML = `
+            <div>
+              <div class="etiqueta-mes">${m.etiqueta}</div>
+              ${m.monto ? `<div class="monto-mes">${formatearCOP(m.monto)}</div>` : ''}
+            </div>
+            <div class="acciones-mes">
+              <span class="pill-mes ${pillClase}">${pillTexto}</span>
+              ${m.pago_id ? `<i class="fa-solid fa-print icon-btn" title="Ver / imprimir recibo" data-pago="${m.pago_id}"></i>` : ''}
+            </div>
+          `;
+          cont.appendChild(fila);
+        });
+
+        cont.querySelectorAll('.fa-print').forEach(icono => {
+          icono.addEventListener('click', () => {
+            window.open(`/api/clientes/${id}/recibo/${icono.dataset.pago}`, '_blank');
+          });
+        });
+      })
+      .catch(() => {
+        document.getElementById('listaMeses').innerHTML = '<div style="text-align:center;color:var(--rojo-mal);padding:20px;">No se pudo cargar el historial.</div>';
+      });
+  }
+
+  // ============================================================
+  // MODAL RENOVAR / COBRAR — registra el pago y abre el recibo en PDF
+  // ============================================================
+  const modalRenovar = document.getElementById('modalRenovarOverlay');
+  function cerrarModalRenovar(){ modalRenovar.classList.remove('mostrar'); }
+  document.getElementById('cerrarModalRenovar').addEventListener('click', cerrarModalRenovar);
+  document.getElementById('cancelarModalRenovar').addEventListener('click', cerrarModalRenovar);
+  modalRenovar.addEventListener('click', (e) => { if(e.target === modalRenovar) cerrarModalRenovar(); });
+
+  function abrirModalRenovar(cliente){
+    document.getElementById('renovarId').value = cliente.id;
+    document.getElementById('renovarNombreCliente').textContent = cliente.nombre;
+    document.getElementById('renovarSubCliente').textContent = `${cliente.ciudad || '—'} · Plan ${cliente.plan} · Vence ${formatearFecha(cliente.fecha_vencimiento)}`;
+    document.getElementById('renovarMonto').value = cliente.valor || 0;
+    document.getElementById('renovarConcepto').value = `Renovación plan ${cliente.plan} — Billar Class`;
+    document.getElementById('renovarFechaPago').value = new Date().toISOString().slice(0,10);
+
+    // La nueva fecha de vencimiento se cuenta a partir de la fecha de vencimiento
+    // actual si todavía no ha llegado (para no perder los días ya pagados), o desde
+    // hoy si ya venció.
+    const hoy = new Date().toISOString().slice(0,10);
+    const base = (cliente.fecha_vencimiento && cliente.fecha_vencimiento > hoy) ? cliente.fecha_vencimiento : hoy;
+    const meses = MESES_POR_PLAN[cliente.plan] || 1;
+    document.getElementById('renovarFechaVencimiento').value = sumarMeses(base, meses);
+
+    document.getElementById('errorRenovar').style.display = 'none';
+    modalRenovar.classList.add('mostrar');
+  }
+
+  document.getElementById('btnConfirmarRenovar').addEventListener('click', () => {
+    const id = document.getElementById('renovarId').value;
+    const cliente = ultimosClientes.find(c => c.id === id);
+    const errorEl = document.getElementById('errorRenovar');
+    const monto = parseInt(document.getElementById('renovarMonto').value, 10) || 0;
+    const fechaPago = document.getElementById('renovarFechaPago').value;
+    const fechaVencimiento = document.getElementById('renovarFechaVencimiento').value;
+    const concepto = document.getElementById('renovarConcepto').value.trim();
+
+    if(!monto || !fechaPago || !fechaVencimiento){
+      errorEl.textContent = 'Completa el monto, la fecha de pago y la nueva fecha de vencimiento.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+
+    const cubreDesde = (cliente && cliente.fecha_vencimiento && cliente.fecha_vencimiento > fechaPago) ? cliente.fecha_vencimiento : fechaPago;
+
+    fetch(`/api/suscripcion/${id}/renovar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fecha_vencimiento: fechaVencimiento,
+        monto, concepto,
+        fecha_pago: fechaPago,
+        cubre_desde: cubreDesde,
+        cubre_hasta: fechaVencimiento
+      })
+    })
+      .then(r => r.json())
+      .then(resp => {
+        if(resp.ok){
+          cerrarModalRenovar();
+          cargarClientes();
+          cargarEstadisticas();
+          if(resp.pago) window.open(`/api/clientes/${id}/recibo/${resp.pago.id}`, '_blank');
+        } else {
+          errorEl.textContent = resp.mensaje || 'No se pudo registrar la renovación.';
+          errorEl.style.display = 'block';
+        }
+      })
+      .catch(() => {
+        errorEl.textContent = 'No se pudo conectar con el servidor.';
+        errorEl.style.display = 'block';
+      });
+  });
+
   cargarClientes();
+  cargarEstadisticas();
 </script>
 
 </body>

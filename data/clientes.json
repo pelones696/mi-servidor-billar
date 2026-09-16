@@ -8,7 +8,25 @@
     "valor": 100000,
     "fecha_inicio": "2026-08-15",
     "fecha_vencimiento": "2026-10-15",
-    "activo": true
+    "activo": true,
+    "historial_pagos": [
+      {
+        "id": "pago-1001",
+        "fecha_pago": "2026-08-15",
+        "monto": 100000,
+        "concepto": "Pago plan Mensual — Billar Class",
+        "cubre_desde": "2026-08-15",
+        "cubre_hasta": "2026-09-15"
+      },
+      {
+        "id": "pago-1002",
+        "fecha_pago": "2026-09-15",
+        "monto": 100000,
+        "concepto": "Renovación plan Mensual — Billar Class",
+        "cubre_desde": "2026-09-15",
+        "cubre_hasta": "2026-10-15"
+      }
+    ]
   },
   {
     "id": "local-2",
@@ -19,7 +37,17 @@
     "valor": 100000,
     "fecha_inicio": "2026-08-02",
     "fecha_vencimiento": "2026-09-02",
-    "activo": false
+    "activo": false,
+    "historial_pagos": [
+      {
+        "id": "pago-2001",
+        "fecha_pago": "2026-08-02",
+        "monto": 100000,
+        "concepto": "Pago plan Mensual — Billar Class",
+        "cubre_desde": "2026-08-02",
+        "cubre_hasta": "2026-09-02"
+      }
+    ]
   },
   {
     "id": "local-3",
@@ -30,7 +58,17 @@
     "valor": 270000,
     "fecha_inicio": "2026-06-20",
     "fecha_vencimiento": "2026-09-20",
-    "activo": true
+    "activo": true,
+    "historial_pagos": [
+      {
+        "id": "pago-3001",
+        "fecha_pago": "2026-06-20",
+        "monto": 270000,
+        "concepto": "Pago plan Trimestral — Billar Class",
+        "cubre_desde": "2026-06-20",
+        "cubre_hasta": "2026-09-20"
+      }
+    ]
   },
   {
     "id": "local-4",
@@ -41,6 +79,16 @@
     "valor": 100000,
     "fecha_inicio": "2026-09-28",
     "fecha_vencimiento": "2026-10-28",
-    "activo": true
+    "activo": true,
+    "historial_pagos": [
+      {
+        "id": "pago-4001",
+        "fecha_pago": "2026-09-28",
+        "monto": 100000,
+        "concepto": "Pago plan Mensual — Billar Class",
+        "cubre_desde": "2026-09-28",
+        "cubre_hasta": "2026-10-28"
+      }
+    ]
   }
 ]
