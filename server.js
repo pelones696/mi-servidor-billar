@@ -15,7 +15,68 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(express.static('public'));
 
-const RUTA_DATOS = path.join(__dirname, 'data', 'clientes.json');
+// ============================================================
+// ALMACENAMIENTO PERMANENTE — separado del código que se actualiza
+//
+// Problema que esto resuelve: cada vez que se sube una actualización del
+// programa (git push → Railway vuelve a construir el contenedor), el disco
+// del contenedor se reemplaza por uno nuevo. Si los datos de los clientes
+// vivieran solo ahí, cada actualización los reiniciaría a lo que trae el
+// código (perdiendo tiendas/pagos ya registrados).
+//
+// La solución es un Volumen persistente de Railway: un disco aparte que
+// SOBREVIVE a cada actualización/redeploy, sin importar cuántas veces se
+// suba código nuevo. Cuando ese volumen está conectado, Railway pone
+// automáticamente su ruta en la variable de entorno RAILWAY_VOLUME_MOUNT_PATH
+// — si existe, los datos se guardan ahí (para siempre); si no existe
+// (por ejemplo, corriendo el programa en una PC local para pruebas), se usa
+// la carpeta "data" que trae el proyecto, exactamente como antes.
+//
+// La carpeta "data" del proyecto (en git) queda entonces como una PLANTILLA
+// de arranque: solo se usa una vez, para sembrar el volumen la primera vez
+// que se conecta. Después de eso, el código nunca la vuelve a tocar — todo
+// lo que pasa en el programa (nuevos clientes, pagos, cambios) se lee y
+// escribe SOLO en el volumen permanente.
+// ============================================================
+const CARPETA_DATOS_PLANTILLA = path.join(__dirname, 'data');
+let CARPETA_DATOS = process.env.RAILWAY_VOLUME_MOUNT_PATH || CARPETA_DATOS_PLANTILLA;
+
+function asegurarAlmacenamientoPermanente() {
+  try {
+    fs.mkdirSync(CARPETA_DATOS, { recursive: true });
+    const destino = path.join(CARPETA_DATOS, 'clientes.json');
+
+    if (!fs.existsSync(destino)) {
+      const plantilla = path.join(CARPETA_DATOS_PLANTILLA, 'clientes.json');
+      if (CARPETA_DATOS !== CARPETA_DATOS_PLANTILLA && fs.existsSync(plantilla)) {
+        fs.copyFileSync(plantilla, destino);
+        console.log(`📦 Primer arranque con almacenamiento permanente: se copiaron los datos iniciales a ${destino}`);
+      } else {
+        fs.writeFileSync(destino, '[]', 'utf-8');
+        console.log(`📦 Se creó un archivo de datos nuevo (vacío) en ${destino}`);
+      }
+    }
+
+    if (process.env.RAILWAY_VOLUME_MOUNT_PATH) {
+      console.log(`💾 Usando almacenamiento PERMANENTE (volumen de Railway): ${destino}`);
+      console.log('   Los datos aquí NO se borran ni se reinician con las actualizaciones del código.');
+    } else {
+      console.log(`💾 Usando la carpeta local del proyecto (sin volumen conectado): ${destino}`);
+      console.log('   ⚠️  En Railway, esto se reinicia con cada actualización — conecta un Volumen para que sea permanente.');
+    }
+  } catch (err) {
+    console.log(`⚠️  No se pudo usar la carpeta de almacenamiento permanente (${CARPETA_DATOS}): ${err.message}`);
+    console.log('   Se usará la carpeta local del proyecto en su lugar (los datos NO sobrevivirán a la próxima actualización).');
+    CARPETA_DATOS = CARPETA_DATOS_PLANTILLA;
+    fs.mkdirSync(CARPETA_DATOS, { recursive: true });
+    if (!fs.existsSync(path.join(CARPETA_DATOS, 'clientes.json'))) {
+      fs.writeFileSync(path.join(CARPETA_DATOS, 'clientes.json'), '[]', 'utf-8');
+    }
+  }
+}
+asegurarAlmacenamientoPermanente();
+
+const RUTA_DATOS = path.join(CARPETA_DATOS, 'clientes.json');
 
 // ---------- Utilidades para leer/escribir la "base de datos" (archivo JSON) ----------
 function leerClientes() {
